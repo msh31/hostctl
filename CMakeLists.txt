@@ -20,7 +20,7 @@ set(IMGUI_SRC
 )
 
 add_executable(imgui-loader
-    main.cpp
+    src/main.cpp
     ${IMGUI_SRC}
 )
 
