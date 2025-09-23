@@ -3,6 +3,10 @@
 #endif	
 
 #include <iostream>
+#include <vector>
+#include <string>
+
+
 #include <GLFW/glfw3.h>
 
 #include "imgui.h"
@@ -124,6 +128,18 @@ int main() {
     ImGui_ImplOpenGL3_Init();
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
+// TODO: move this
+    struct Entry {
+        std::string Name;
+        bool IsSelected = false;
+    };
+
+    std::vector<Entry> mockupEntries = {
+        {"test"},
+        {"test2"},
+        {"test3"}
+    };
+
 //main loop
     do{
         // can cause flickering
@@ -147,8 +163,21 @@ int main() {
 
 // main imgui window
         ImGui::Begin("Main Window", nullptr, window_flags);
-        ImGui::Text("Hello, fullscreen UI with no ImGui titlebar!");
-        ImGui::Button("Click me");
+
+        ImGui::Text("Process list");
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+        if (ImGui::BeginListBox("")) {
+            for (auto& item : mockupEntries) {
+                if (ImGui::Selectable(item.Name.c_str(), item.IsSelected)) {
+                    for (auto& other : mockupEntries) {
+                        other.IsSelected = false;
+                    }
+                    item.IsSelected = true;
+                }
+            }
+            ImGui::EndListBox();
+        }
+
         ImGui::End();
 		
         ImGui::Render();
