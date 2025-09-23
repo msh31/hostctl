@@ -32,15 +32,23 @@ int main() {
         return -1;
     }
     glfwMakeContextCurrent(window);
+
+
     
 //imgui context creation, flags & setting platform/render backends
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowBorderSize = 0.0f; 
+	style.WindowRounding = 5.0f; 
+	style.Colors[ImGuiCol_Border] = ImVec4(0,0,0,0);   
+
+
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-    //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
@@ -55,8 +63,24 @@ int main() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
+		
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		ImGui::SetNextWindowViewport(viewport->ID);
 
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_NoNavFocus;
+
+		ImGui::Begin("Main Window", nullptr, window_flags);
+		ImGui::Text("Hello, fullscreen UI with no ImGui titlebar!");
+		ImGui::Button("Click me");
+		ImGui::End();
+		
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
