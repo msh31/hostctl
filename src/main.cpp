@@ -32,8 +32,6 @@ int main() {
         return -1;
     }
     glfwMakeContextCurrent(window);
-
-
     
 //imgui context creation, flags & setting platform/render backends
     IMGUI_CHECKVERSION();
