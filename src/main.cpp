@@ -24,7 +24,7 @@ int main() {
     
 // window creation    
     GLFWwindow* window;
-    window = glfwCreateWindow( 1024, 768, "ImGui loader", NULL, NULL);
+    window = glfwCreateWindow(525, 300, "DLL Injector", NULL, NULL);
     
     if(window == NULL) {
         fprintf(stderr, "Failed to open GLFW window. OpenGL 3.3 support is required!\n");
