@@ -1,10 +1,13 @@
+#ifdef __APPLE__
+#define GL_SILENCE_DEPRECATION
+#endif	
+
 #include <iostream>
 #include <GLFW/glfw3.h>
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
-
 
 int main() {
     if(!glfwInit()) {
@@ -37,6 +40,8 @@ int main() {
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
     ImGui_ImplOpenGL3_Init();
