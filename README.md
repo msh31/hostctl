@@ -11,5 +11,7 @@ git clone --recurse-submodules https://github.com/msh31/imgui-loader.git
 cd imgui-loader
 
 cmake -B build -S .
+cmake --build build 
+# or to specify release mode
 cmake --build build --config Release
 ```
