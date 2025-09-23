@@ -9,6 +9,8 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
 
+#include "fonts/rubik.h"
+
 int main() {
     if(!glfwInit()) {
         fprintf(stderr, "Failed to initialize GLFW\n");
@@ -111,17 +113,18 @@ int main() {
     colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
     colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
     colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
-
+    
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;     
+    
+    io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 16.0f);
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
     ImGui_ImplOpenGL3_Init();
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 //main loop
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     do{
         // can cause flickering
         glClear(GL_COLOR_BUFFER_BIT);
@@ -142,6 +145,7 @@ int main() {
             ImGuiWindowFlags_NoBringToFrontOnFocus |
             ImGuiWindowFlags_NoNavFocus;
 
+// main imgui window
         ImGui::Begin("Main Window", nullptr, window_flags);
         ImGui::Text("Hello, fullscreen UI with no ImGui titlebar!");
         ImGui::Button("Click me");
