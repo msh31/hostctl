@@ -122,9 +122,9 @@ int main() {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;     
    	
-	void* font_copy = malloc(Rubik_len);
-	memcpy(font_copy, Rubik, Rubik_len);
-	io.Fonts->AddFontFromMemoryTTF(font_copy, Rubik_len, 16.0f); // ImGui will free this
+	ImFontConfig font_config;
+	font_config.FontDataOwnedByAtlas = false;
+	io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 16.0f, &font_config, NULL);
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
     ImGui_ImplOpenGL3_Init();
@@ -168,7 +168,7 @@ int main() {
 
         ImGui::Text("Process list");
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        if (ImGui::BeginListBox("#hidden")) {
+        if (ImGui::BeginListBox("##hidden")) {
             for (auto& item : mockupEntries) {
                 if (ImGui::Selectable(item.Name.c_str(), item.IsSelected)) {
                     for (auto& other : mockupEntries) {
