@@ -21,6 +21,7 @@ set(IMGUI_SRC
 
 add_executable(imgui-loader
     src/main.cpp
+    src/ThemeManager/themes.cpp
     ${IMGUI_SRC}
 )
 

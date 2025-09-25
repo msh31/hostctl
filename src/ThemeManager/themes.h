@@ -1,5 +1,7 @@
 #pragma once
 
+#include "imgui.h"
+
 enum class ThemeType {
     Dark,
     Light,
@@ -14,8 +16,4 @@ class ThemeManager {
         
     private:
         static ThemeType currentTheme;
-        
-        static void SetDarkTheme();
-        static void SetLightTheme(); 
-        static void SetCustomTheme();
 };
