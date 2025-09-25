@@ -10,7 +10,6 @@ enum class ThemeType {
 class ThemeManager {
     public:
         static void ApplyTheme(ThemeType theme);
-        static void LoadDefaultTheme();
         static ThemeType GetCurrentTheme() { return currentTheme; }
         
     private:
