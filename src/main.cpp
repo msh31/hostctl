@@ -5,6 +5,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <GLFW/glfw3.h>
 
@@ -17,6 +19,22 @@
 
 #include "fonts/rubik.h"
 #include "ThemeManager/themes.h"
+
+std::string extractProjectName(const std::string& path) {
+    std::string temp = path;
+
+    if (!temp.empty() && temp.back() == '\\') {
+        temp.pop_back();
+    }
+
+    size_t pos = temp.find_last_of('\\');
+
+    if (pos != std::string::npos) {
+        return temp.substr(pos + 1);
+    } else {
+        return temp;
+    }
+}
 
 int main() {
     if(!glfwInit()) {
@@ -60,7 +78,7 @@ int main() {
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 // TODO: move this
-std::string projectFolderDirectory;
+std::string projectFolderDirectory, projectName;
 
 //main loop
     do{
@@ -86,8 +104,13 @@ std::string projectFolderDirectory;
 // main imgui window
         ImGui::Begin("Main Window", nullptr, window_flags);
 
+        ImGui::Text("Project Name:");
+        ImGui::SameLine();
+        ImGui::InputText("##hidden1", &projectName);
+
         ImGui::Text("Project Folder:");
-        ImGui::InputText("##hidden", &projectFolderDirectory);
+        ImGui::SameLine();
+        ImGui::InputText("##hidden2", &projectFolderDirectory);
 
         if (ImGui::Button("Browse Project Folder")) {
             IGFD::FileDialogConfig config;
@@ -99,6 +122,7 @@ std::string projectFolderDirectory;
                 std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
                 std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
                 projectFolderDirectory = filePath;
+                projectName = extractProjectName(filePath);
             }
             ImGuiFileDialog::Instance()->Close();
         }
