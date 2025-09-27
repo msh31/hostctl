@@ -33,7 +33,7 @@ int main() {
     
 // window creation    
     GLFWwindow* window;
-    window = glfwCreateWindow(1200, 700, "HostCTL - A simple local network manager for XAMPP/WAMP", NULL, NULL);
+    window = glfwCreateWindow(900, 600, "HostCTL - A simple local network manager for XAMPP/WAMP", NULL, NULL);
     
     if(window == NULL) {
         fprintf(stderr, "Failed to open GLFW window. OpenGL 3.3 support is required!\n");
@@ -86,7 +86,8 @@ std::string projectFolderDirectory;
 // main imgui window
         ImGui::Begin("Main Window", nullptr, window_flags);
 
-        ImGui::InputText("Folder location", &projectFolderDirectory);
+        ImGui::Text("Project Folder:");
+        ImGui::InputText("##hidden", &projectFolderDirectory);
 
         if (ImGui::Button("Browse Project Folder")) {
             IGFD::FileDialogConfig config;
