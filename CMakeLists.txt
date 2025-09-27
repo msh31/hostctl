@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(imgui-loader)
+project(hostctl)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,7 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/libs/imgui)
 set(GLFW_DIR ${CMAKE_SOURCE_DIR}/libs/glfw)
-add_subdirectory(libs/glfw)
+add_subdirectory(${GLFW_DIR})
 
 set(IMGUI_SRC
     ${IMGUI_DIR}/imgui.cpp
@@ -19,20 +19,27 @@ set(IMGUI_SRC
     ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
 )
 
-add_executable(imgui-loader
+set(IMGUIFILEDIALOG_SRC
+    ${CMAKE_SOURCE_DIR}/libs/ImGuiFileDialog/ImGuiFileDialog.cpp
+)
+
+add_executable(hostctl
     src/main.cpp
     src/ThemeManager/themes.cpp
     ${IMGUI_SRC}
+    ${IMGUIFILEDIALOG_SRC}
 )
 
-target_include_directories(imgui-loader PRIVATE
+target_include_directories(hostctl PRIVATE
     ${IMGUI_DIR}
     ${IMGUI_DIR}/backends
+    
+    ${CMAKE_SOURCE_DIR}/libs/ImGuiFileDialog
 )
 
 find_package(OpenGL REQUIRED)
 target_link_libraries(
-    imgui-loader 
+    hostctl 
     glfw 
     OpenGL::GL
 )
