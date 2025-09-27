@@ -36,6 +36,20 @@ std::string extractProjectName(const std::string& path) {
     }
 }
 
+bool webServerFound() {
+    bool webServerFound = false;
+    
+    if(fs::exists("C:\\zzz")) {
+        webServerFound = true;
+    }
+
+    if(fs::exists("C:\\xxx")) {
+        webServerFound = true;
+    }
+
+    return webServerFound;
+}
+
 int main() {
     if(!glfwInit()) {
         fprintf(stderr, "Failed to initialize GLFW\n");
@@ -51,7 +65,7 @@ int main() {
     
 // window creation    
     GLFWwindow* window;
-    window = glfwCreateWindow(900, 600, "HostCTL - A simple local network manager for XAMPP/WAMP", NULL, NULL);
+    window = glfwCreateWindow(750, 550, "HostCTL - A simple local network manager for XAMPP/WAMP", NULL, NULL);
     
     if(window == NULL) {
         fprintf(stderr, "Failed to open GLFW window. OpenGL 3.3 support is required!\n");
@@ -72,6 +86,7 @@ int main() {
 	ImFontConfig font_config;
 	font_config.FontDataOwnedByAtlas = false;
 	io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 16.0f, &font_config, NULL);
+    ImFont* titleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 24.0f, &font_config, NULL);
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
     ImGui_ImplOpenGL3_Init();
@@ -104,19 +119,57 @@ std::string projectFolderDirectory, projectName;
 // main imgui window
         ImGui::Begin("Main Window", nullptr, window_flags);
 
-        ImGui::Text("Project Name:");
-        ImGui::SameLine();
-        ImGui::InputText("##hidden1", &projectName);
+        float panelWidth = ImGui::GetContentRegionAvail().x * 0.8f;
+        float panelHeight = ImGui::GetContentRegionAvail().y * 0.7f;
 
-        ImGui::Text("Project Folder:");
-        ImGui::SameLine();
-        ImGui::InputText("##hidden2", &projectFolderDirectory);
+        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - panelWidth) * 0.5f);
+        ImGui::SetCursorPosY((ImGui::GetContentRegionAvail().y - panelHeight) * 0.5f);
 
-        if (ImGui::Button("Browse Project Folder")) {
+        ImGui::BeginChild("HostSetupPanel", ImVec2(panelWidth, panelHeight), true, ImGuiWindowFlags_AlwaysUseWindowPadding);
+
+        ImGui::PushFont(titleFont);
+        ImGui::Text("HostCTL");
+        ImGui::PopFont();
+        ImGui::Separator();
+        ImGui::Dummy(ImVec2(0, 15));
+
+        float labelWidth = ImGui::CalcTextSize("Local Domain Name:").x;
+
+        ImGui::Text("Local Domain Name:");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (150 - ImGui::CalcTextSize("Local Domain Name:").x));
+        ImGui::SetNextItemWidth(220);
+        ImGui::InputText("##domainInput", &projectName);
+        ImGui::Dummy(ImVec2(0, 10));
+
+        ImGui::Text("Folder Location:");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (150 - ImGui::CalcTextSize("Folder Location:").x));
+        ImGui::SetNextItemWidth(220);
+        ImGui::InputText("##folderInput", &projectFolderDirectory);
+        ImGui::SameLine();
+        if (ImGui::Button("Browse")) {
             IGFD::FileDialogConfig config;
 	        config.path = ".";
             ImGuiFileDialog::Instance()->OpenDialog("ChooseDirDlgKey", "Choose Directory", nullptr, config);
         }
+        ImGui::Dummy(ImVec2(0, 20));
+
+        if (ImGui::Button("Create Host", ImVec2(120, 0))) { 
+            
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Restart Web Server", ImVec2(150, 0))) {
+            
+        }
+        
+        ImGui::Dummy(ImVec2(0, 15)); 
+        float statusTextWidth = ImGui::CalcTextSize("Web Server Status: Not Found").x;
+
+        ImGui::TextColored(webServerFound() ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 
+                           "Web Server Status: %s", webServerFound() ? "Running" : "Not Found");
+
+        ImGui::EndChild();
         if (ImGuiFileDialog::Instance()->Display("ChooseDirDlgKey")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
                 std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
@@ -128,10 +181,8 @@ std::string projectFolderDirectory, projectName;
         }
 
         ImGui::End();
-		
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
