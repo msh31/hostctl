@@ -57,13 +57,13 @@ WebServerInfo detectWebServers() {
         info.xamppConfigPath = "C:\\xampp\\apache\\conf\\extra\\httpd-vhosts.conf";
     }
     
-    if (fs::exists("C:\\wamp\\bin\\apache")) {
-        for (const auto& entry : fs::directory_iterator("C:\\wamp\\bin\\apache")) {
+    if (fs::exists("C:\\wamp64\\bin\\apache")) {
+        for (const auto& entry : fs::directory_iterator("C:\\wamp64\\bin\\apache")) {
             if (entry.is_directory()) {
                 std::string vhostPath = entry.path().string() + "\\conf\\extra\\httpd-vhosts.conf";
                 if (fs::exists(vhostPath)) {
                     info.wampFound = true;
-                    info.wampPath = "C:\\wamp";
+                    info.wampPath = "C:\\wamp64";
                     info.wampConfigPath = vhostPath;
                     break;
                 }
