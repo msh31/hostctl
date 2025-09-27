@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <filesystem>
+#include <fstream>
 namespace fs = std::filesystem;
 
 #include <GLFW/glfw3.h>
@@ -19,6 +20,9 @@ namespace fs = std::filesystem;
 
 #include "fonts/rubik.h"
 #include "ThemeManager/themes.h"
+
+#define XAMPP_ID 0
+#define WAMP_ID 1
 
 struct WebServerInfo {
     bool xamppFound = false;
@@ -74,6 +78,42 @@ WebServerInfo detectWebServers() {
     return info;
 }
 
+bool writeToConfig(int configID, const WebServerInfo& info, const std::string &projectName) {
+    std::string filename;
+    std::string textToAppend;
+
+    if (configID != XAMPP_ID && configID != WAMP_ID) {
+        return false;
+    }
+
+    if (configID == XAMPP_ID) {
+        if (!info.xamppFound) {
+            return false;
+        }
+        filename = info.xamppConfigPath;
+        textToAppend = "\nxampp!";
+    }
+
+    if (configID == WAMP_ID) {
+        if (!info.wampFound) {
+            return false;
+        }
+        filename = info.wampConfigPath;
+        textToAppend = "wamp!";
+    }
+
+    std::ofstream outfile(filename, std::ios::app);
+    if (!outfile.is_open()) {
+        std::cerr << "Unable to open file: " << filename << "\n";
+        return false;
+    }
+
+
+    outfile << textToAppend << "\n";
+    outfile.close();
+    return true;
+}
+
 int main() {
     if(!glfwInit()) {
         fprintf(stderr, "Failed to initialize GLFW\n");
@@ -120,6 +160,8 @@ int main() {
 
 // TODO: move this
 std::string projectFolderDirectory, projectName;
+std::string placeholderText = "";
+int selectedServer = -1; //none
 
 //main loop
     do{
@@ -145,8 +187,8 @@ std::string projectFolderDirectory, projectName;
 // main imgui window
         ImGui::Begin("Main Window", nullptr, window_flags);
 
-        float panelWidth = ImGui::GetContentRegionAvail().x * 0.8f;
-        float panelHeight = ImGui::GetContentRegionAvail().y * 0.7f;
+        float panelWidth = ImGui::GetContentRegionAvail().x * 1.0f;
+        float panelHeight = ImGui::GetContentRegionAvail().y * 1.0f;
 
         ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - panelWidth) * 0.5f);
         ImGui::SetCursorPosY((ImGui::GetContentRegionAvail().y - panelHeight) * 0.5f);
@@ -181,8 +223,17 @@ std::string projectFolderDirectory, projectName;
         }
         ImGui::Dummy(ImVec2(0, 20));
 
-        if (ImGui::Button("Create Host", ImVec2(120, 0))) { 
-            
+        if (ImGui::Button("Create Host", ImVec2(120, 0))) {
+            if (selectedServer == -1) {
+                placeholderText = "Please select a web server first.";
+            } else {
+                bool success = writeToConfig(selectedServer, serverInfo, projectName);
+                if (success) {
+                    placeholderText = "Virtual host written to config.";
+                } else {
+                    placeholderText = "Failed to write to config file.";
+                }
+            }
         }
         ImGui::SameLine();
         if (ImGui::Button("Restart Web Server", ImVec2(150, 0))) {
@@ -204,9 +255,20 @@ std::string projectFolderDirectory, projectName;
         } else {
             statusText += "Not Found";
         }
+        ImGui::Dummy(ImVec2(0, 10));
+
+        if (serverInfo.xamppFound) {
+            ImGui::RadioButton("XAMPP", &selectedServer, XAMPP_ID);
+        }
+        if (serverInfo.wampFound) {
+            ImGui::RadioButton("WAMP", &selectedServer, WAMP_ID);
+        }
+        ImGui::Dummy(ImVec2(0, 20));
 
         ImGui::TextColored(anyServerFound ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 
                         "%s", statusText.c_str());
+
+        ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.7f), placeholderText.c_str());
 
         ImGui::EndChild();
         if (ImGuiFileDialog::Instance()->Display("ChooseDirDlgKey")) {
