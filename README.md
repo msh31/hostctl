@@ -1,17 +1,23 @@
-# ImGui Loader
-A GUI version of the [dll injector](https://github.com/msh31/dll-injector) project, made with ImGui & GLFW. 
-> Note: this started as a personal interest, but for a school assignment I had to make a desktop application with C++ (The DLL injector part was my idea.)
+# HostCTL
+A simple GUI tool to automatically configure local development domains for XAMPP/WAMP projects.
 
+> Note: This was a school assignment, I took the the base of my [dll injector project](https://github.com/msh31/imgui-dll-injector) to get started with the GUI functionality and left out anything not required.
 
 ---
 
-## ⚒️ How to build
-```zsh
-git clone --recurse-submodules https://github.com/msh31/imgui-loader.git
-cd imgui-loader
+## Getting Started
+### Requirements
+- C++ 17+ compatible compiler (MSVC, GCC, or Clang)
+- CMake 3.20 or higher
 
-cmake -B build -S .
-cmake --build build 
-# or to specify release mode
-cmake --build build --config Release
+### Build & Run
+```zsh
+git clone --recurse-submodules -j8 https://github.com/msh31/hostctl.git
+cd hostctl
+
+# Windows
+cmake --build build
+
+# MacOS
+
 ```
