@@ -20,6 +20,18 @@ namespace fs = std::filesystem;
 #include "fonts/rubik.h"
 #include "ThemeManager/themes.h"
 
+struct WebServerInfo {
+    bool xamppFound = false;
+    bool wampFound = false;
+
+    std::string xamppPath;
+    std::string wampPath;
+    std::string xamppConfigPath;
+    std::string wampConfigPath;
+    std::string xamppServiceName = "Apache2.4";
+    std::string wampServiceName = "wampapache64";
+};
+
 std::string extractProjectName(const std::string& path) {
     std::string temp = path;
 
@@ -36,18 +48,30 @@ std::string extractProjectName(const std::string& path) {
     }
 }
 
-bool webServerFound() {
-    bool webServerFound = false;
+WebServerInfo detectWebServers() {
+    WebServerInfo info;
+
+    if (fs::exists("C:\\xampp\\apache\\conf\\extra\\httpd-vhosts.conf")) {
+        info.xamppFound = true;
+        info.xamppPath = "C:\\xampp";
+        info.xamppConfigPath = "C:\\xampp\\apache\\conf\\extra\\httpd-vhosts.conf";
+    }
     
-    if(fs::exists("C:\\zzz")) {
-        webServerFound = true;
+    if (fs::exists("C:\\wamp\\bin\\apache")) {
+        for (const auto& entry : fs::directory_iterator("C:\\wamp\\bin\\apache")) {
+            if (entry.is_directory()) {
+                std::string vhostPath = entry.path().string() + "\\conf\\extra\\httpd-vhosts.conf";
+                if (fs::exists(vhostPath)) {
+                    info.wampFound = true;
+                    info.wampPath = "C:\\wamp";
+                    info.wampConfigPath = vhostPath;
+                    break;
+                }
+            }
+        }
     }
-
-    if(fs::exists("C:\\xxx")) {
-        webServerFound = true;
-    }
-
-    return webServerFound;
+    
+    return info;
 }
 
 int main() {
@@ -55,6 +79,8 @@ int main() {
         fprintf(stderr, "Failed to initialize GLFW\n");
         return -1;
     }
+
+    WebServerInfo serverInfo = detectWebServers();
 
 // window properties 
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
@@ -166,8 +192,21 @@ std::string projectFolderDirectory, projectName;
         ImGui::Dummy(ImVec2(0, 15)); 
         float statusTextWidth = ImGui::CalcTextSize("Web Server Status: Not Found").x;
 
-        ImGui::TextColored(webServerFound() ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 
-                           "Web Server Status: %s", webServerFound() ? "Running" : "Not Found");
+        bool anyServerFound = serverInfo.xamppFound || serverInfo.wampFound;
+        std::string statusText = "Web Server Status: ";
+
+        if (serverInfo.xamppFound && serverInfo.wampFound) {
+            statusText += "XAMPP & WAMP Found";
+        } else if (serverInfo.xamppFound) {
+            statusText += "XAMPP Found";
+        } else if (serverInfo.wampFound) {
+            statusText += "WAMP Found";
+        } else {
+            statusText += "Not Found";
+        }
+
+        ImGui::TextColored(anyServerFound ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 
+                        "%s", statusText.c_str());
 
         ImGui::EndChild();
         if (ImGuiFileDialog::Instance()->Display("ChooseDirDlgKey")) {
