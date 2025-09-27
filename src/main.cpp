@@ -9,8 +9,11 @@
 #include <GLFW/glfw3.h>
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
+
+#include "ImGuiFileDialog.h"
 
 #include "fonts/rubik.h"
 #include "ThemeManager/themes.h"
@@ -30,7 +33,7 @@ int main() {
     
 // window creation    
     GLFWwindow* window;
-    window = glfwCreateWindow(525, 300, "DLL Injector", NULL, NULL);
+    window = glfwCreateWindow(1200, 700, "HostCTL - A simple local network manager for XAMPP/WAMP", NULL, NULL);
     
     if(window == NULL) {
         fprintf(stderr, "Failed to open GLFW window. OpenGL 3.3 support is required!\n");
@@ -57,16 +60,7 @@ int main() {
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 // TODO: move this
-    struct Entry {
-        std::string Name;
-        bool IsSelected = false;
-    };
-
-    std::vector<Entry> mockupEntries = {
-        {"test"},
-        {"test2"},
-        {"test3"}
-    };
+std::string projectFolderDirectory;
 
 //main loop
     do{
@@ -92,18 +86,20 @@ int main() {
 // main imgui window
         ImGui::Begin("Main Window", nullptr, window_flags);
 
-        ImGui::Text("Process list");
-        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        if (ImGui::BeginListBox("##hidden")) {
-            for (auto& item : mockupEntries) {
-                if (ImGui::Selectable(item.Name.c_str(), item.IsSelected)) {
-                    for (auto& other : mockupEntries) {
-                        other.IsSelected = false;
-                    }
-                    item.IsSelected = true;
-                }
+        ImGui::InputText("Folder location", &projectFolderDirectory);
+
+        if (ImGui::Button("Browse Project Folder")) {
+            IGFD::FileDialogConfig config;
+	        config.path = ".";
+            ImGuiFileDialog::Instance()->OpenDialog("ChooseDirDlgKey", "Choose Directory", nullptr, config);
+        }
+        if (ImGuiFileDialog::Instance()->Display("ChooseDirDlgKey")) {
+            if (ImGuiFileDialog::Instance()->IsOk()) {
+                std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+                std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+                projectFolderDirectory = filePath;
             }
-            ImGui::EndListBox();
+            ImGuiFileDialog::Instance()->Close();
         }
 
         ImGui::End();
@@ -119,7 +115,6 @@ int main() {
         glfwWindowShouldClose(window) == 0
     );
 
-    std::cout << "goodbye!";
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
