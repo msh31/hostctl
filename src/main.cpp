@@ -43,50 +43,41 @@ struct WebServerInfo {
 };
 
 std::string extractProjectName(const std::string& path) {
-    std::string temp = path;
-
-    if (!temp.empty() && temp.back() == '\\') {
-        temp.pop_back();
-    }
-
-    size_t pos = temp.find_last_of('\\');
-
-    if (pos != std::string::npos) {
-        return temp.substr(pos + 1);
-    } else {
-        return temp;
-    }
+    return fs::path(path).filename().string();
 }
 
 WebServerInfo detectWebServers() {
     WebServerInfo info;
 
-    if (fs::exists("C:\\xampp\\apache\\conf\\extra\\httpd-vhosts.conf")) {
+    fs::path xamppConfig = "C:/xampp/apache/conf/extra/httpd-vhosts.conf";
+    if (fs::exists(xamppConfig)) {
         info.xamppFound = true;
-        info.xamppPath = "C:\\xampp";
-        info.xamppConfigPath = "C:\\xampp\\apache\\conf\\extra\\httpd-vhosts.conf";
+        info.xamppPath = "C:/xampp";
+        info.xamppConfigPath = xamppConfig.string();
     }
     
-    if (fs::exists("C:\\wamp64\\bin\\apache")) {
-        for (const auto& entry : fs::directory_iterator("C:\\wamp64\\bin\\apache")) {
+    fs::path wampApache = "C:/wamp64/bin/apache";
+    if (fs::exists(wampApache)) {
+        for (const auto& entry : fs::directory_iterator(wampApache)) {
             if (entry.is_directory()) {
-                std::string vhostPath = entry.path().string() + "\\conf\\extra\\httpd-vhosts.conf";
+                fs::path vhostPath = entry.path() / "conf" / "extra" / "httpd-vhosts.conf";
                 if (fs::exists(vhostPath)) {
                     info.wampFound = true;
-                    info.wampPath = "C:\\wamp64";
-                    info.wampConfigPath = vhostPath;
+                    info.wampPath = "C:/wamp64";
+                    info.wampConfigPath = vhostPath.string();
                     break;
                 }
             }
         }
     }
 
-	if(fs::exists("/Applications/MAMP/conf/apache/extra/httpd-vhosts.conf")) {
-		info.mampFound = true;
-		info.mampPath = "/Applications/MAMP/";
-		info.mampConfigPath = "/Applications/MAMP/conf/apache/extra/httpd-vhosts.conf";
-	}
-    
+    fs::path mampConfig = "/Applications/MAMP/conf/apache/extra/httpd-vhosts.conf";
+    if (fs::exists(mampConfig)) {
+        info.mampFound = true;
+        info.mampPath = "/Applications/MAMP/";
+        info.mampConfigPath = mampConfig.string();
+    }
+
     return info;
 }
 
@@ -262,6 +253,19 @@ int selectedServer = -1; //none
         ImGui::Dummy(ImVec2(0, 15)); 
         float statusTextWidth = ImGui::CalcTextSize("Web Server Status: Not Found").x;
 
+        ImGui::Dummy(ImVec2(0, 10));
+        
+        if (serverInfo.xamppFound) {
+            ImGui::RadioButton("XAMPP", &selectedServer, XAMPP_ID);
+        }
+        if (serverInfo.wampFound) {
+            ImGui::RadioButton("WAMP", &selectedServer, WAMP_ID);
+        }
+		if (serverInfo.mampFound) {
+            ImGui::RadioButton("MAMP", &selectedServer, MAMP_ID);
+		}
+        ImGui::Dummy(ImVec2(0, 20));
+        
         bool anyServerFound = serverInfo.xamppFound || serverInfo.wampFound || serverInfo.mampFound;
         std::string statusText = "Web Server Status: ";
 
@@ -271,27 +275,16 @@ int selectedServer = -1; //none
             statusText += "XAMPP Found";
         } else if (serverInfo.wampFound) {
             statusText += "WAMP Found";
-		} else if (serverInfo.mampFound) {
-			statusText += "MAMP (PRO) found";
+        } else if (serverInfo.mampFound) {
+            statusText += "MAMP (PRO) found";
         } else {
             statusText += "Not Found";
         }
-        ImGui::Dummy(ImVec2(0, 10));
-
-        if (serverInfo.xamppFound && serverInfo.wampFound) {
-            ImGui::RadioButton("XAMPP", &selectedServer, XAMPP_ID);
-			ImGui::RadioButton("WAMP", &selectedServer, WAMP_ID);
-        }
-		if (serverInfo.mampFound) {
-			ImGui::RadioButton("MAMP", &selectedServer, MAMP_ID);
-		}
-        ImGui::Dummy(ImVec2(0, 20));
-
         ImGui::TextColored(anyServerFound ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 
-                        "%s", statusText.c_str());
-
+        "%s", statusText.c_str());
+        
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.7f), placeholderText.c_str());
-
+        
         ImGui::EndChild();
         if (ImGuiFileDialog::Instance()->Display("ChooseDirDlgKey")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
