@@ -23,15 +23,21 @@ namespace fs = std::filesystem;
 
 #define XAMPP_ID 0
 #define WAMP_ID 1
+#define MAMP_ID 2
 
 struct WebServerInfo {
     bool xamppFound = false;
     bool wampFound = false;
+	bool mampFound = false;	
 
     std::string xamppPath;
     std::string wampPath;
+	std::string mampPath;
+
     std::string xamppConfigPath;
     std::string wampConfigPath;
+	std::string mampConfigPath;
+
     std::string xamppServiceName = "Apache2.4";
     std::string wampServiceName = "wampapache64";
 };
@@ -74,6 +80,12 @@ WebServerInfo detectWebServers() {
             }
         }
     }
+
+	if(fs::exists("/Applications/MAMP/conf/apache/extra/httpd-vhosts.conf")) {
+		info.mampFound = true;
+		info.mampPath = "/Applications/MAMP/";
+		info.mampConfigPath = "/Applications/MAMP/conf/apache/extra/httpd-vhosts.conf";
+	}
     
     return info;
 }
@@ -131,7 +143,7 @@ int main() {
     
 // window creation    
     GLFWwindow* window;
-    window = glfwCreateWindow(750, 550, "HostCTL - A simple local network manager for XAMPP/WAMP", NULL, NULL);
+    window = glfwCreateWindow(750, 550, "HostCTL - A simple local network manager for XAMPP, WAMP & MAMP (PRO)", NULL, NULL);
     
     if(window == NULL) {
         fprintf(stderr, "Failed to open GLFW window. OpenGL 3.3 support is required!\n");
@@ -243,7 +255,7 @@ int selectedServer = -1; //none
         ImGui::Dummy(ImVec2(0, 15)); 
         float statusTextWidth = ImGui::CalcTextSize("Web Server Status: Not Found").x;
 
-        bool anyServerFound = serverInfo.xamppFound || serverInfo.wampFound;
+        bool anyServerFound = serverInfo.xamppFound || serverInfo.wampFound || serverInfo.mampFound;
         std::string statusText = "Web Server Status: ";
 
         if (serverInfo.xamppFound && serverInfo.wampFound) {
@@ -252,6 +264,8 @@ int selectedServer = -1; //none
             statusText += "XAMPP Found";
         } else if (serverInfo.wampFound) {
             statusText += "WAMP Found";
+		} else if (serverInfo.mampFound) {
+			statusText += "MAMP (PRO) found";
         } else {
             statusText += "Not Found";
         }
