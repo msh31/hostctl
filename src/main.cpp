@@ -103,7 +103,6 @@ bool writeToConfig(int configID, const WebServerInfo& info, const std::string &p
             return false;
         }
         filename = info.xamppConfigPath;
-        textToAppend = "\nxampp!";
     }
 
     if (configID == WAMP_ID) {
@@ -111,8 +110,16 @@ bool writeToConfig(int configID, const WebServerInfo& info, const std::string &p
             return false;
         }
         filename = info.wampConfigPath;
-        textToAppend = "wamp!";
     }
+
+	if(configID == MAMP_ID) {
+		if(!info.mampFound) {
+			return false;
+		}
+		filename = info.mampConfigPath;
+	}
+
+	textToAppend = "test!";
 
     std::ofstream outfile(filename, std::ios::app);
     if (!outfile.is_open()) {
@@ -271,12 +278,13 @@ int selectedServer = -1; //none
         }
         ImGui::Dummy(ImVec2(0, 10));
 
-        if (serverInfo.xamppFound) {
+        if (serverInfo.xamppFound && serverInfo.wampFound) {
             ImGui::RadioButton("XAMPP", &selectedServer, XAMPP_ID);
+			ImGui::RadioButton("WAMP", &selectedServer, WAMP_ID);
         }
-        if (serverInfo.wampFound) {
-            ImGui::RadioButton("WAMP", &selectedServer, WAMP_ID);
-        }
+		if (serverInfo.mampFound) {
+			ImGui::RadioButton("MAMP", &selectedServer, MAMP_ID);
+		}
         ImGui::Dummy(ImVec2(0, 20));
 
         ImGui::TextColored(anyServerFound ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 
