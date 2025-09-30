@@ -2,8 +2,10 @@
 A simple GUI tool to automatically configure local development domains for XAMPP/WAMP projects.
 
 > Note: This was a school assignment, I took the the base of my [dll injector project](https://github.com/msh31/imgui-dll-injector) to get started with the GUI functionality and left out anything not required.
-
 ---
+
+## Info
+##### All source code for the main application is in ``main.cpp``, not at all OOP, all hail procedural programming!
 
 ## Getting Started
 ### Requirements
@@ -15,9 +17,7 @@ A simple GUI tool to automatically configure local development domains for XAMPP
 git clone --recurse-submodules -j8 https://github.com/msh31/hostctl.git
 cd hostctl
 
-# Windows
+cmake -S . -B build
 cmake --build build
-
-# MacOS
-
-```
+# optional, built as release:
+cmake --build build --config Release
