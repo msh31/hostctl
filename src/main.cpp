@@ -27,7 +27,6 @@ namespace fs = std::filesystem;
 
 std::string projectDirectory, projectName;
 std::string placeholderText = "";
-int selectedServer = -1; //none
 
 struct WebServerInfo {
     bool xamppFound = false;
@@ -85,8 +84,41 @@ WebServerInfo detectWebServers() {
     return info;
 }
 
-bool writeToConfig(const WebServerInfo& info, const std::string &projectName) {
-    return false;
+bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& serverName, const std::string& documentRoot) {
+    std::string configPath;
+    
+    if (serverID == XAMPP_ID) {
+        if (!info.xamppFound) return false;
+        configPath = info.xamppConfigPath;
+    } else if (serverID == WAMP_ID) {
+        if (!info.wampFound) return false;
+        configPath = info.wampConfigPath;
+    } else if (serverID == MAMP_ID) {
+        if (!info.mampFound) return false;
+        configPath = info.mampConfigPath;
+    } else {
+        return false;
+    }
+
+    std::string vhostConfig = R"(
+        <VirtualHost *:80>
+            ServerName )" + serverName + R"(.local
+            DocumentRoot ")" + documentRoot + R"("
+            <Directory ")" + documentRoot + R"(">
+                AllowOverride All
+                Require all granted
+            </Directory>
+        </VirtualHost>
+
+    )";
+
+    std::ofstream configFile(configPath, std::ios::app);
+    if (!configFile.is_open()) {
+        return false;
+    }
+    configFile << vhostConfig;
+    configFile.close();
+    return true;
 }
 
 int main() {
@@ -124,6 +156,10 @@ int main() {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;     
     
+    ImFontConfig cfg16;
+    cfg16.FontDataOwnedByAtlas = false;
+    ImFont* font16 = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 16.0f, &cfg16);
+
     ImFontConfig cfg18;
     cfg18.FontDataOwnedByAtlas = false;
     ImFont* subTitleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 18.0f, &cfg18);
@@ -202,18 +238,42 @@ int main() {
         ImGui::Dummy(ImVec2(0, 20));
 
         if (ImGui::Button("Create Host", ImVec2(120, 0))) {
+            bool anySuccess = false;
+            placeholderText = "";
+            
             if (serverInfo.xamppFound) {
-                ImGui::RadioButton("XAMPP", &selectedServer, XAMPP_ID);
-                placeholderText = "xampp";
+                bool success = writeToConfig(XAMPP_ID, serverInfo, projectName, projectDirectory);
+                if (success) {
+                    placeholderText += " Success: Custom vhost written to xampp config! ";
+                    anySuccess = true;
+                } else {
+                    placeholderText += " Failure: Writing to xampp config! ";
+                }
             }
+            
             if (serverInfo.wampFound) {
-                ImGui::RadioButton("WAMP", &selectedServer, WAMP_ID);
-                placeholderText += " wamp";
+                bool success = writeToConfig(WAMP_ID, serverInfo, projectName, projectDirectory);
+                if (success) {
+                    placeholderText += " Success: Custom vhost written to wamp config! ";
+                    anySuccess = true;
+                } else {
+                    placeholderText += " Failure: Writing to wamp config! ";
+                }
             }
+            
             if (serverInfo.mampFound) {
-                ImGui::RadioButton("MAMP", &selectedServer, MAMP_ID);
+                bool success = writeToConfig(MAMP_ID, serverInfo, projectName, projectDirectory);
+                if (success) {
+                    placeholderText += " Success: Custom vhost written to mamp (pro) config! ";
+                    anySuccess = true;
+                } else {
+                    placeholderText += " Failure: Writing to mamp (pro) config! ";
+                }
             }
-
+            
+            if (!anySuccess) {
+                placeholderText = "No servers found or all failed!";
+            }
         }
         ImGui::SameLine();
         if (ImGui::Button("Restart Web Server", ImVec2(150, 0))) {
