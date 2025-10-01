@@ -244,30 +244,30 @@ int main() {
             if (serverInfo.xamppFound) {
                 bool success = writeToConfig(XAMPP_ID, serverInfo, projectName, projectDirectory);
                 if (success) {
-                    placeholderText += " Success: Custom vhost written to xampp config! ";
+                    placeholderText += "Success: Custom vhost written to xampp config!\n";
                     anySuccess = true;
                 } else {
-                    placeholderText += " Failure: Writing to xampp config! ";
+                    placeholderText += "Failure: Writing to xampp config!\n";
                 }
             }
             
             if (serverInfo.wampFound) {
                 bool success = writeToConfig(WAMP_ID, serverInfo, projectName, projectDirectory);
                 if (success) {
-                    placeholderText += " Success: Custom vhost written to wamp config! ";
+                    placeholderText += "Success: Custom vhost written to wamp config!\n";
                     anySuccess = true;
                 } else {
-                    placeholderText += " Failure: Writing to wamp config! ";
+                    placeholderText += "Failure: Writing to wamp config!\n";
                 }
             }
             
             if (serverInfo.mampFound) {
                 bool success = writeToConfig(MAMP_ID, serverInfo, projectName, projectDirectory);
                 if (success) {
-                    placeholderText += " Success: Custom vhost written to mamp (pro) config! ";
+                    placeholderText += "Success: Custom vhost written to mamp (pro) config!\n";
                     anySuccess = true;
                 } else {
-                    placeholderText += " Failure: Writing to mamp (pro) config! ";
+                    placeholderText += "Failure: Writing to mamp (pro) config!\n";
                 }
             }
             
