@@ -25,6 +25,10 @@ namespace fs = std::filesystem;
 #define WAMP_ID 1
 #define MAMP_ID 2
 
+std::string projectDirectory, projectName;
+std::string placeholderText = "";
+int selectedServer = -1; //none
+
 struct WebServerInfo {
     bool xamppFound = false;
     bool wampFound = false;
@@ -81,47 +85,8 @@ WebServerInfo detectWebServers() {
     return info;
 }
 
-bool writeToConfig(int configID, const WebServerInfo& info, const std::string &projectName) {
-    std::string filename;
-    std::string textToAppend;
-
-    if (configID != XAMPP_ID && configID != WAMP_ID) {
-        return false;
-    }
-
-    if (configID == XAMPP_ID) {
-        if (!info.xamppFound) {
-            return false;
-        }
-        filename = info.xamppConfigPath;
-    }
-
-    if (configID == WAMP_ID) {
-        if (!info.wampFound) {
-            return false;
-        }
-        filename = info.wampConfigPath;
-    }
-
-	if(configID == MAMP_ID) {
-		if(!info.mampFound) {
-			return false;
-		}
-		filename = info.mampConfigPath;
-	}
-
-	textToAppend = "test!";
-
-    std::ofstream outfile(filename, std::ios::app);
-    if (!outfile.is_open()) {
-        std::cerr << "Unable to open file: " << filename << "\n";
-        return false;
-    }
-
-
-    outfile << textToAppend << "\n";
-    outfile.close();
-    return true;
+bool writeToConfig(const WebServerInfo& info, const std::string &projectName) {
+    return false;
 }
 
 int main() {
@@ -141,7 +106,7 @@ int main() {
     
 // window creation    
     GLFWwindow* window;
-    window = glfwCreateWindow(750, 550, "HostCTL - A simple local network manager for XAMPP, WAMP & MAMP (PRO)", NULL, NULL);
+    window = glfwCreateWindow(750, 550, "HostCTL - A simple local network manager for XAMPP, WAMP & MAMP (Pro)", NULL, NULL);
     
     if(window == NULL) {
         fprintf(stderr, "Failed to open GLFW window. OpenGL 3.3 support is required!\n");
@@ -163,15 +128,11 @@ int main() {
 	font_config.FontDataOwnedByAtlas = false;
 	io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 16.0f, &font_config, NULL);
     ImFont* titleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 24.0f, &font_config, NULL);
+    ImFont* subTitleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 14.0f, &font_config, NULL);
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
     ImGui_ImplOpenGL3_Init();
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-
-// TODO: move this
-std::string projectFolderDirectory, projectName;
-std::string placeholderText = "";
-int selectedServer = -1; //none
 
 //main loop
     do{
@@ -208,6 +169,11 @@ int selectedServer = -1; //none
         ImGui::PushFont(titleFont);
         ImGui::Text("HostCTL");
         ImGui::PopFont();
+        ImGui::PushFont(subTitleFont);
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255,255,255,130));
+        ImGui::Text("Note: If you have xampp AND wamp, the host will be written to both because I am lazy..");
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
         ImGui::Separator();
         ImGui::Dummy(ImVec2(0, 15));
 
@@ -224,7 +190,7 @@ int selectedServer = -1; //none
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (150 - ImGui::CalcTextSize("Folder Location:").x));
         ImGui::SetNextItemWidth(220);
-        ImGui::InputText("##folderInput", &projectFolderDirectory);
+        ImGui::InputText("##folderInput", &projectDirectory);
         ImGui::SameLine();
         if (ImGui::Button("Browse")) {
             IGFD::FileDialogConfig config;
@@ -234,16 +200,18 @@ int selectedServer = -1; //none
         ImGui::Dummy(ImVec2(0, 20));
 
         if (ImGui::Button("Create Host", ImVec2(120, 0))) {
-            if (selectedServer == -1) {
-                placeholderText = "Please select a web server first.";
-            } else {
-                bool success = writeToConfig(selectedServer, serverInfo, projectName);
-                if (success) {
-                    placeholderText = "Virtual host written to config.";
-                } else {
-                    placeholderText = "Failed to write to config file.";
-                }
+            if (serverInfo.xamppFound) {
+                ImGui::RadioButton("XAMPP", &selectedServer, XAMPP_ID);
+                placeholderText = "xampp";
             }
+            if (serverInfo.wampFound) {
+                ImGui::RadioButton("WAMP", &selectedServer, WAMP_ID);
+                placeholderText += " wamp";
+            }
+            if (serverInfo.mampFound) {
+                ImGui::RadioButton("MAMP", &selectedServer, MAMP_ID);
+            }
+
         }
         ImGui::SameLine();
         if (ImGui::Button("Restart Web Server", ImVec2(150, 0))) {
@@ -252,19 +220,7 @@ int selectedServer = -1; //none
         
         ImGui::Dummy(ImVec2(0, 15)); 
         float statusTextWidth = ImGui::CalcTextSize("Web Server Status: Not Found").x;
-
         ImGui::Dummy(ImVec2(0, 10));
-        
-        if (serverInfo.xamppFound) {
-            ImGui::RadioButton("XAMPP", &selectedServer, XAMPP_ID);
-        }
-        if (serverInfo.wampFound) {
-            ImGui::RadioButton("WAMP", &selectedServer, WAMP_ID);
-        }
-		if (serverInfo.mampFound) {
-            ImGui::RadioButton("MAMP", &selectedServer, MAMP_ID);
-		}
-        ImGui::Dummy(ImVec2(0, 20));
         
         bool anyServerFound = serverInfo.xamppFound || serverInfo.wampFound || serverInfo.mampFound;
         std::string statusText = "Web Server Status: ";
@@ -276,7 +232,7 @@ int selectedServer = -1; //none
         } else if (serverInfo.wampFound) {
             statusText += "WAMP Found";
         } else if (serverInfo.mampFound) {
-            statusText += "MAMP (PRO) found";
+            statusText += "MAMP (Pro) found";
         } else {
             statusText += "Not Found";
         }
@@ -286,11 +242,13 @@ int selectedServer = -1; //none
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.7f), placeholderText.c_str());
         
         ImGui::EndChild();
+
+        //file dialog destreuction
         if (ImGuiFileDialog::Instance()->Display("ChooseDirDlgKey")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
                 std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
                 std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-                projectFolderDirectory = filePath;
+                projectDirectory = filePath;
                 projectName = extractProjectName(filePath);
             }
             ImGuiFileDialog::Instance()->Close();
