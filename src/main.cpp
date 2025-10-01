@@ -123,12 +123,14 @@ int main() {
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;     
-   	
-	ImFontConfig font_config;
-	font_config.FontDataOwnedByAtlas = false;
-	io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 16.0f, &font_config, NULL);
-    ImFont* titleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 24.0f, &font_config, NULL);
-    ImFont* subTitleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 14.0f, &font_config, NULL);
+    
+    ImFontConfig cfg18;
+    cfg18.FontDataOwnedByAtlas = false;
+    ImFont* subTitleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 18.0f, &cfg18);
+
+    ImFontConfig cfg24;
+    cfg24.FontDataOwnedByAtlas = false;
+    ImFont* titleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 24.0f, &cfg24);
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
     ImGui_ImplOpenGL3_Init();
