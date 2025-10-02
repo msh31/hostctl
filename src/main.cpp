@@ -133,7 +133,6 @@ int main() {
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // to make macOS happy; should not be needed
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // no old OpenGL
     
 // window creation    
@@ -301,7 +300,7 @@ int main() {
         ImGui::TextColored(anyServerFound ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 
         "%s", statusText.c_str());
         
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.7f), placeholderText.c_str());
+        ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.7f), "%s", placeholderText.c_str());
         
         ImGui::EndChild();
 
