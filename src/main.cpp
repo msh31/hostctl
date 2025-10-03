@@ -3,7 +3,7 @@
 #endif	
 
 #include <iostream>
-#include <vector>
+#include <cstdlib> 
 #include <string>
 #include <filesystem>
 #include <fstream>
@@ -276,10 +276,26 @@ int main() {
         }
         ImGui::SameLine();
         if (ImGui::Button("Restart Web Server", ImVec2(150, 0))) {
-            
+            if(serverInfo.mampFound) {
+                const char* stopScript = "/Applications/MAMP/bin/stopApache.sh";
+                const char* startScript = "/Applications/MAMP/bin/startApache.sh";
+
+                int stopResult = std::system(stopScript);
+                if (stopResult != 0) {
+                    std::cerr << "Failed to stop Apache. Exit code: " << stopResult << "\n";
+                }
+
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+
+                int startResult = std::system(startScript);
+                if (startResult != 0) {
+                    std::cerr << "Failed to start Apache. Exit code: " << startResult << "\n";
+                }
+
+                std::cout << "Apache successfully restarted via MAMP.";
+            }
         }
-        
-        ImGui::Dummy(ImVec2(0, 15)); 
+
         float statusTextWidth = ImGui::CalcTextSize("Web Server Status: Not Found").x;
         ImGui::Dummy(ImVec2(0, 10));
         
