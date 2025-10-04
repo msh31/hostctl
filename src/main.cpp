@@ -101,14 +101,15 @@ bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& s
     }
 
     std::string vhostConfig = R"(
-        <VirtualHost *:80>
-            ServerName )" + serverName + R"(.local
-            DocumentRoot ")" + documentRoot + R"("
-            <Directory ")" + documentRoot + R"(">
-                AllowOverride All
-                Require all granted
-            </Directory>
-        </VirtualHost>
+
+<VirtualHost *:80>
+    ServerName )" + serverName + R"(.local
+    DocumentRoot ")" + documentRoot + R"("
+    <Directory ")" + documentRoot + R"(">
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
 
     )";
 
@@ -214,8 +215,6 @@ int main() {
         ImGui::Separator();
         ImGui::Dummy(ImVec2(0, 15));
 
-        float labelWidth = ImGui::CalcTextSize("Local Domain Name:").x;
-
         ImGui::Text("Local Domain Name:");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (150 - ImGui::CalcTextSize("Local Domain Name:").x));
@@ -296,7 +295,6 @@ int main() {
             }
         }
 
-        float statusTextWidth = ImGui::CalcTextSize("Web Server Status: Not Found").x;
         ImGui::Dummy(ImVec2(0, 10));
         
         bool anyServerFound = serverInfo.xamppFound || serverInfo.wampFound || serverInfo.mampFound;
