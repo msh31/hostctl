@@ -8,7 +8,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/libs/imgui)
 set(GLFW_DIR ${CMAKE_SOURCE_DIR}/libs/glfw)
+
 add_subdirectory(${GLFW_DIR})
+add_subdirectory(${CMAKE_SOURCE_DIR}/libs/sentinel)
 
 set(IMGUI_SRC
     ${IMGUI_DIR}/imgui.cpp
@@ -29,8 +31,6 @@ add_executable(hostctl
     src/ThemeManager/themes.cpp
     ${IMGUI_SRC}
     ${IMGUIFILEDIALOG_SRC}
-        src/ServiceHelper/serviceHelper.cpp
-        src/ServiceHelper/serviceHelper.h
 )
 
 target_include_directories(hostctl PRIVATE
@@ -46,4 +46,5 @@ target_link_libraries(
     hostctl 
     glfw 
     OpenGL::GL
+    sentinel
 )

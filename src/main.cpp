@@ -2,6 +2,10 @@
 #define GL_SILENCE_DEPRECATION
 #endif	
 
+#ifdef _WIN32
+#include <sentinel/core/utils/service_helper.h>
+#endif
+
 #include <iostream>
 #include <cstdlib> 
 #include <string>
