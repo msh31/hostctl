@@ -7,3 +7,6 @@
 [submodule "libs/ImGuiFileDialog"]
 	path = libs/ImGuiFileDialog
 	url = https://github.com/aiekick/ImGuiFileDialog.git
+[submodule "libs/sentinel"]
+	path = libs/sentinel
+	url = https://github.com/msh31/sentinel.git

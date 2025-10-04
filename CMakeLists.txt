@@ -29,6 +29,8 @@ add_executable(hostctl
     src/ThemeManager/themes.cpp
     ${IMGUI_SRC}
     ${IMGUIFILEDIALOG_SRC}
+        src/ServiceHelper/serviceHelper.cpp
+        src/ServiceHelper/serviceHelper.h
 )
 
 target_include_directories(hostctl PRIVATE
