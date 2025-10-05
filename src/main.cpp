@@ -1,5 +1,5 @@
-#ifdef __APPLE__
-#define GL_SILENCE_DEPRECATION
+#ifdef defined(__APPLE__)
+    #define GL_SILENCE_DEPRECATION
 #endif	
 
 #ifdef _WIN32
@@ -31,6 +31,7 @@ namespace fs = std::filesystem;
 
 std::string projectDirectory, projectName;
 std::string placeholderText = "";
+service_helper serviceHelper;
 
 struct WebServerInfo {
     bool xamppFound = false;
@@ -107,7 +108,7 @@ bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& s
     std::string vhostConfig = R"(
 
 <VirtualHost *:80>
-    ServerName )" + serverName + R"(.local
+    ServerName )" + serverName + R"(
     DocumentRoot ")" + documentRoot + R"("
     <Directory ")" + documentRoot + R"(">
         AllowOverride All
@@ -117,11 +118,24 @@ bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& s
 
     )";
 
+#ifdef _WIN32
+    std::string hostPath = R"(C:\Windows\System32\drivers\etc\hosts)";
+#elif defined(__APPLE__) || defined(__linux__)
+    std::string hostPath = R"(/etc/hosts)";
+#endif
+
+
+    std::ofstream hostsFile(hostPath, std::ios::app);
     std::ofstream configFile(configPath, std::ios::app);
-    if (!configFile.is_open()) {
+
+    if (!configFile.is_open() || !hostsFile.is_open()) {
         return false;
     }
+
+    hostsFile << "127.0.0.1 " << serverName << "\n"; //replace later (with just appending the server name if 1 exists)
     configFile << vhostConfig;
+
+    hostsFile.close();
     configFile.close();
     return true;
 }
@@ -296,6 +310,32 @@ int main() {
                 }
 
                 std::cout << "Apache successfully restarted via MAMP.";
+            }
+
+            if (serverInfo.wampFound) {
+                bool stopSuccess = serviceHelper.stopService(serverInfo.wampServiceName);
+                bool startSuccess = serviceHelper.startService(serverInfo.wampServiceName);
+
+                if (!stopSuccess) {
+                    placeholderText += "Failed to stop apache - wamp!\n";
+                }
+
+                if (!startSuccess) {
+                    placeholderText += "Failed to start apache - wamp!\n";
+                }
+            }
+
+            if (serverInfo.xamppFound) {
+                bool stopSuccess = serviceHelper.stopService(serverInfo.xamppServiceName);
+                bool startSuccess = serviceHelper.startService(serverInfo.xamppServiceName);
+
+                if (!stopSuccess) {
+                    placeholderText += "Failed to stop apache - xampp!\n";
+                }
+
+                if (!startSuccess) {
+                    placeholderText += "Failed to start apache - xampp!\n";
+                }
             }
         }
 
