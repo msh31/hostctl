@@ -105,28 +105,45 @@ bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& s
         return false;
     }
 
+    std::string normalizedDocRoot = documentRoot;
     std::string normalizedDirPath = documentRoot;
 
 #ifdef _WIN32
+    std::replace(normalizedDocRoot.begin(), normalizedDocRoot.end(), '\\', '/');
     std::replace(normalizedDirPath.begin(), normalizedDirPath.end(), '\\', '/');
 #endif
 
-    if (normalizedDirPath.back() != '/') {
+    if (!normalizedDirPath.empty() && normalizedDirPath.back() != '/') {
         normalizedDirPath += '/';
     }
 
-    std::string vhostConfig = R"(
+    // duplicate check
+    std::ifstream configIn(configPath);
+    std::string configLine;
+    bool vhostExists = false;
 
+    while (std::getline(configIn, configLine)) {
+        if (configLine.find("ServerName " + serverName) != std::string::npos) {
+            vhostExists = true;
+            break;
+        }
+    }
+    configIn.close();
+
+    if (vhostExists) {
+        return false;
+    }
+
+    std::string vhostConfig = R"(
 <VirtualHost *:80>
     ServerName )" + serverName + R"(
-    DocumentRoot ")" + normalizedDirPath + R"("
+    DocumentRoot ")" + normalizedDocRoot + R"("
     <Directory ")" + normalizedDirPath + R"(">
         AllowOverride All
         Require all granted
     </Directory>
 </VirtualHost>
-
-    )";
+)";
 
 #ifdef _WIN32
     std::string hostPath = R"(C:\Windows\System32\drivers\etc\hosts)";
@@ -134,18 +151,35 @@ bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& s
     std::string hostPath = R"(/etc/hosts)";
 #endif
 
+    // dupe check
+    std::ifstream hostsIn(hostPath);
+    std::string hostLine;
+    bool hostExists = false;
+    while (std::getline(hostsIn, hostLine)) {
+        if (hostLine.find("127.0.0.1 " + serverName) != std::string::npos) {
+            hostExists = true;
+            break;
+        }
+    }
+    hostsIn.close();
 
-    std::ofstream hostsFile(hostPath, std::ios::app);
+    if (!hostExists) {
+        std::ofstream hostsFile(hostPath, std::ios::app);
+
+        if (!hostsFile.is_open()) {
+            return false;
+        }
+
+        hostsFile << "127.0.0.1 " << serverName << "\n";
+        hostsFile.close();
+    }
+
     std::ofstream configFile(configPath, std::ios::app);
-
-    if (!configFile.is_open() || !hostsFile.is_open()) {
+    if (!configFile.is_open()) {
         return false;
     }
 
-    hostsFile << "127.0.0.1 " << serverName << "\n"; //replace later (with just appending the server name if 1 exists)
-    configFile << vhostConfig;
-
-    hostsFile.close();
+    configFile << vhostConfig << "\n";
     configFile.close();
     return true;
 }
