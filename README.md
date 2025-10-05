@@ -4,10 +4,9 @@ A simple GUI tool to automatically configure local development domains for XAMPP
 > Note: This was a school assignment, I took the the base of my [dll injector project](https://github.com/msh31/imgui-dll-injector) to get started with the GUI functionality and left out anything not required.
 ---
 
-## Info
-##### All source code for the main application is in ``main.cpp``, not at all OOP, all hail procedural programming!
+<img src="https://i.imgur.com/GXa23eL.png" alt="preview image">
 
-## Getting Started
+## Building
 ### Requirements
 - C++ 17+ compatible compiler (MSVC, GCC, or Clang)
 - CMake 3.20 or higher
@@ -21,3 +20,4 @@ cmake -S . -B build
 cmake --build build
 # optional, built as release:
 cmake --build build --config Release
+```
