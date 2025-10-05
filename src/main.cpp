@@ -105,12 +105,22 @@ bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& s
         return false;
     }
 
+    std::string normalizedDirPath = documentRoot;
+
+#ifdef _WIN32
+    std::replace(normalizedDirPath.begin(), normalizedDirPath.end(), '\\', '/');
+#endif
+
+    if (normalizedDirPath.back() != '/') {
+        normalizedDirPath += '/';
+    }
+
     std::string vhostConfig = R"(
 
 <VirtualHost *:80>
     ServerName )" + serverName + R"(
-    DocumentRoot ")" + documentRoot + R"("
-    <Directory ")" + documentRoot + R"(">
+    DocumentRoot ")" + normalizedDirPath + R"("
+    <Directory ")" + normalizedDirPath + R"(">
         AllowOverride All
         Require all granted
     </Directory>
