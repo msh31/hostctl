@@ -222,9 +222,11 @@ int main() {
     cfg16.FontDataOwnedByAtlas = false;
     ImFont* font16 = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 16.0f, &cfg16);
 
-    ImFontConfig cfg18;
-    cfg18.FontDataOwnedByAtlas = false;
-    ImFont* subTitleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 18.0f, &cfg18);
+    #ifdef __WIN32__
+        ImFontConfig cfg18;
+        cfg18.FontDataOwnedByAtlas = false;
+        ImFont* subTitleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 18.0f, &cfg18);        
+    #endif
 
     ImFontConfig cfg24;
     cfg24.FontDataOwnedByAtlas = false;
@@ -269,11 +271,13 @@ int main() {
         ImGui::PushFont(titleFont);
         ImGui::Text("HostCTL");
         ImGui::PopFont();
+        #ifdef __WIN32__ 
         ImGui::PushFont(subTitleFont);
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255,255,255,130));
         ImGui::Text("Note: If you have xampp AND wamp, the host will be written to both because I am lazy..");
         ImGui::PopStyleColor();
         ImGui::PopFont();
+        #endif
         ImGui::Separator();
         ImGui::Dummy(ImVec2(0, 15));
 
