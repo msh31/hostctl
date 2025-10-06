@@ -10,7 +10,10 @@ set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/libs/imgui)
 set(GLFW_DIR ${CMAKE_SOURCE_DIR}/libs/glfw)
 
 add_subdirectory(${GLFW_DIR})
-add_subdirectory(${CMAKE_SOURCE_DIR}/libs/sentinel)
+
+if(WIN32)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/libs/sentinel)
+endif()
 
 set(IMGUI_SRC
     ${IMGUI_DIR}/imgui.cpp
@@ -42,9 +45,18 @@ target_include_directories(hostctl PRIVATE
 )
 
 find_package(OpenGL REQUIRED)
-target_link_libraries(
-    hostctl 
-    glfw 
-    OpenGL::GL
-    sentinel
-)
+
+if(WIN32)
+    target_link_libraries(
+        hostctl 
+        glfw 
+        OpenGL::GL
+        sentinel
+    )
+else()
+    target_link_libraries(
+        hostctl 
+        glfw 
+        OpenGL::GL
+    )
+endif()

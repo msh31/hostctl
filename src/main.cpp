@@ -1,9 +1,10 @@
-#ifdef defined(__APPLE__)
+#ifdef __APPLE__
     #define GL_SILENCE_DEPRECATION
 #endif	
 
 #ifdef _WIN32
-#include <sentinel/core/utils/service_helper.h>
+    #include <sentinel/core/utils/service_helper.h>
+    service_helper servicehelper;
 #endif
 
 #include <iostream>
@@ -31,7 +32,6 @@ namespace fs = std::filesystem;
 
 std::string projectDirectory, projectName;
 std::string placeholderText = "";
-service_helper serviceHelper;
 
 struct WebServerInfo {
     bool xamppFound = false;
@@ -355,7 +355,8 @@ int main() {
 
                 std::cout << "Apache successfully restarted via MAMP.";
             }
-
+            
+            #ifdef __WIN32__ 
             if (serverInfo.wampFound) {
                 bool stopSuccess = serviceHelper.stopService(serverInfo.wampServiceName);
                 bool startSuccess = serviceHelper.startService(serverInfo.wampServiceName);
@@ -381,6 +382,8 @@ int main() {
                     placeholderText += "Failed to start apache - xampp!\n";
                 }
             }
+
+            #endif
         }
 
         ImGui::Dummy(ImVec2(0, 10));
