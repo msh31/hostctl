@@ -90,17 +90,20 @@ WebServerInfo detectWebServers() {
 }
 
 bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& serverName, const std::string& documentRoot) {
-    std::string configPath;
+    std::string configPath, vhostPort;
     
     if (serverID == XAMPP_ID) {
         if (!info.xamppFound) return false;
         configPath = info.xamppConfigPath;
+        vhostPort = "80";
     } else if (serverID == WAMP_ID) {
         if (!info.wampFound) return false;
         configPath = info.wampConfigPath;
+        vhostPort = "80";
     } else if (serverID == MAMP_ID) {
         if (!info.mampFound) return false;
         configPath = info.mampConfigPath;
+        vhostPort = "8888";
     } else {
         return false;
     }
@@ -133,9 +136,10 @@ bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& s
     if (vhostExists) {
         return false;
     }
-
+    
     std::string vhostConfig = R"(
-<VirtualHost *:80>
+<VirtualHost *:)" + vhostPort + R"(
+>
     ServerName )" + serverName + R"(
     DocumentRoot ")" + normalizedDocRoot + R"("
     <Directory ")" + normalizedDirPath + R"(">
@@ -291,7 +295,7 @@ int main() {
         ImGui::Text("Folder Location:");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (150 - ImGui::CalcTextSize("Folder Location:").x));
-        ImGui::SetNextItemWidth(220);
+        ImGui::SetNextItemWidth(320);
         ImGui::InputText("##folderInput", &projectDirectory);
         ImGui::SameLine();
         if (ImGui::Button("Browse")) {
