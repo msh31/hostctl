@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Web Server Test</title>
+  <style>
+    :root {
+      --bg: #f9fafb;
+      --card: #fff;
+      --accent: #2563eb;
+      --muted: #6b7280;
+      --radius: 8px;
+      --max-width: 700px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0;
+      height: 100%;
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: #111827;
+      display: flex;
+      justify-content: center;
+      padding: 32px 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .wrapper {
+      max-width: var(--max-width);
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.8rem;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 1rem;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    @media(min-width: 600px) {
+      main {
+        flex-direction: row;
+        gap: 24px;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      flex: 1;
+    }
+
+    h2, h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    ul, ol {
+      padding-left: 20px;
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: var(--muted);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 16px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .btn:hover,
+    .btn:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+      outline: none;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.875rem;
+      font-weight: 400;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <h1>Web Server Test Page</h1>
+      <p>A minimal HTML + CSS example to verify your server is serving files correctly.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Hello — it works!</h2>
+        <p>This file was served from your web server. Try editing this text and refresh the page to confirm live changes.</p>
+        <ul>
+          <li>Static text</li>
+          <li>Inline CSS</li>
+          <li>Accessible structure</li>
+        </ul>
+        <a class="btn" href="#" onclick="alert('JS is working too!'); return false;">Click me</a>
+      </section>
+
+      <section class="card">
+        <h3>Quick tests</h3>
+        <p>Try:</p>
+        <ol>
+          <li>Open developer tools (F12) and look at the Network tab.</li>
+          <li>View Page Source to see HTML structure.</li>
+          <li>Change this file and refresh.</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      <small>Test page • <time datetime="2025-10-06">Oct 6, 2025</time></small>
+    </footer>
+  </div>
+</body>
+</html>
