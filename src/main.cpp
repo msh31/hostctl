@@ -138,8 +138,7 @@ bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& s
     }
     
     std::string vhostConfig = R"(
-<VirtualHost *:)" + vhostPort + R"(
->
+<VirtualHost *:)" + vhostPort + R"(>
     ServerName )" + serverName + R"(
     DocumentRoot ")" + normalizedDocRoot + R"("
     <Directory ")" + normalizedDirPath + R"(">
