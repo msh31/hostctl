@@ -4,7 +4,6 @@
 
 #ifdef _WIN32
     #include <sentinel/core/utils/service_helper.h>
-    service_helper servicehelper;
 #endif
 
 #include <iostream>
@@ -31,7 +30,7 @@ namespace fs = std::filesystem;
 #define MAMP_ID 2
 
 std::string projectDirectory, projectName;
-std::string placeholderText = "";
+std::string placeholderText;
 
 struct WebServerInfo {
     bool xamppFound = false;
@@ -185,6 +184,66 @@ bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& s
     configFile << vhostConfig << "\n";
     configFile.close();
     return true;
+}
+
+bool restartApache(const WebServerInfo& info) {
+    if(info.mampFound) {
+        const char* stopScript = "/Applications/MAMP/bin/stopApache.sh";
+        const char* startScript = "/Applications/MAMP/bin/startApache.sh";
+
+        int stopResult = std::system(stopScript);
+        if (stopResult != 0) {
+            std::cerr << "Failed to stop Apache. Exit code: " << stopResult << "\n";
+        }
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        int startResult = std::system(startScript);
+        if (startResult != 0) {
+            std::cerr << "Failed to start Apache. Exit code: " << startResult << "\n";
+            return false;
+        }
+
+        std::cout << "Apache successfully restarted via MAMP.";
+        return true;
+    }
+
+#ifdef _WIN32
+
+    service_helper serviceHelper;
+    if (info.wampFound) {
+        bool stopSuccess = serviceHelper.stopService(info.wampServiceName);
+        bool startSuccess = serviceHelper.startService(info.wampServiceName);
+
+        if (!stopSuccess) {
+            placeholderText += "Failed to stop apache - wamp!\n";
+        }
+
+        if (!startSuccess) {
+            placeholderText += "Failed to start apache - wamp!\n";
+            return false;
+        }
+
+        return true;
+    }
+
+    if (info.xamppFound) {
+        bool stopSuccess = serviceHelper.stopService(info.xamppServiceName);
+        bool startSuccess = serviceHelper.startService(info.xamppServiceName);
+
+        if (!stopSuccess) {
+            placeholderText += "Failed to stop apache - xampp!\n";
+        }
+
+        if (!startSuccess) {
+            placeholderText += "Failed to start apache - xampp!\n";
+            return false;
+        }
+
+        return true;
+    }
+
+#endif
 }
 
 int main() {
@@ -344,53 +403,7 @@ int main() {
         }
         ImGui::SameLine();
         if (ImGui::Button("Restart Web Server", ImVec2(150, 0))) {
-            if(serverInfo.mampFound) {
-                const char* stopScript = "/Applications/MAMP/bin/stopApache.sh";
-                const char* startScript = "/Applications/MAMP/bin/startApache.sh";
-
-                int stopResult = std::system(stopScript);
-                if (stopResult != 0) {
-                    std::cerr << "Failed to stop Apache. Exit code: " << stopResult << "\n";
-                }
-
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-
-                int startResult = std::system(startScript);
-                if (startResult != 0) {
-                    std::cerr << "Failed to start Apache. Exit code: " << startResult << "\n";
-                }
-
-                std::cout << "Apache successfully restarted via MAMP.";
-            }
-            
-            #ifdef __WIN32__ 
-            if (serverInfo.wampFound) {
-                bool stopSuccess = serviceHelper.stopService(serverInfo.wampServiceName);
-                bool startSuccess = serviceHelper.startService(serverInfo.wampServiceName);
-
-                if (!stopSuccess) {
-                    placeholderText += "Failed to stop apache - wamp!\n";
-                }
-
-                if (!startSuccess) {
-                    placeholderText += "Failed to start apache - wamp!\n";
-                }
-            }
-
-            if (serverInfo.xamppFound) {
-                bool stopSuccess = serviceHelper.stopService(serverInfo.xamppServiceName);
-                bool startSuccess = serviceHelper.startService(serverInfo.xamppServiceName);
-
-                if (!stopSuccess) {
-                    placeholderText += "Failed to stop apache - xampp!\n";
-                }
-
-                if (!startSuccess) {
-                    placeholderText += "Failed to start apache - xampp!\n";
-                }
-            }
-
-            #endif
+            restartApache(serverInfo);
         }
 
         ImGui::Dummy(ImVec2(0, 10));
