@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 #include "imgui_stdlib.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
-
+#include <sentinel/core/logger.h>
 #include "ImGuiFileDialog.h"
 
 #include "fonts/rubik.h"
@@ -28,6 +28,8 @@ namespace fs = std::filesystem;
 #define XAMPP_ID 0
 #define WAMP_ID 1
 #define MAMP_ID 2
+
+logger log;
 
 std::string projectDirectory, projectName;
 std::string placeholderText;
@@ -193,18 +195,18 @@ bool restartApache(const WebServerInfo& info) {
 
         int stopResult = std::system(stopScript);
         if (stopResult != 0) {
-            std::cerr << "Failed to stop Apache. Exit code: " << stopResult << "\n";
+            log.error("Failed to stop Apache. Exit code: " + stopResult);
         }
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         int startResult = std::system(startScript);
         if (startResult != 0) {
-            std::cerr << "Failed to start Apache. Exit code: " << startResult << "\n";
+            log.error("Failed to start Apache. Exit code: " + startResult);
             return false;
         }
 
-        std::cout << "Apache successfully restarted via MAMP.";
+        log.success("Apache successfully restarted via MAMP.");
         return true;
     }
 
@@ -216,11 +218,14 @@ bool restartApache(const WebServerInfo& info) {
         bool startSuccess = serviceHelper.startService(info.wampServiceName);
 
         if (!stopSuccess) {
-            placeholderText += "Failed to stop apache - wamp!\n";
+            placeholderText += "Failed to stop Apache (Wamp)!\n";
+            log.error("Failed to stop Apache (Wamp). Exit code: " + GetLastError());
+            return false;
         }
 
         if (!startSuccess) {
-            placeholderText += "Failed to start apache - wamp!\n";
+            placeholderText += "Failed to start Apache (Wamp)!\n";
+            log.error("Failed to stop Apache (Wamp). Exit code: " + GetLastError());
             return false;
         }
 
@@ -232,27 +237,33 @@ bool restartApache(const WebServerInfo& info) {
         bool startSuccess = serviceHelper.startService(info.xamppServiceName);
 
         if (!stopSuccess) {
-            placeholderText += "Failed to stop apache - xampp!\n";
+            placeholderText += "Failed to stop Apache (Xampp)!\n";
+            log.error("Failed to stop Apache (Xampp). Exit code: " + GetLastError());
+            return false;
         }
 
         if (!startSuccess) {
-            placeholderText += "Failed to start apache - xampp!\n";
+            placeholderText += "Failed to start Apache (Xampp)!\n";
+            log.error("Failed to stop Apache (Xampp). Exit code: " + GetLastError());
             return false;
         }
 
         return true;
     }
-
 #endif
+
+    return false;
 }
 
 int main() {
     if(!glfwInit()) {
-        fprintf(stderr, "Failed to initialize GLFW\n");
+        log.error("Failed to initialize GLFW.");
         return -1;
     }
 
     WebServerInfo serverInfo = detectWebServers();
+    log.consoleLoggingEnabled = false;
+    log.fileLoggingEnabled = true;
 
 // window properties 
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
@@ -265,7 +276,7 @@ int main() {
     window = glfwCreateWindow(750, 550, "HostCTL - A simple local network manager for XAMPP, WAMP & MAMP (Pro)", NULL, NULL);
     
     if(window == NULL) {
-        fprintf(stderr, "Failed to open GLFW window. OpenGL 3.3 support is required!\n");
+        log.error("Failed to create GLFW window. OpenGL 3.3 support is required!");
         glfwTerminate();
         return -1;
     }
