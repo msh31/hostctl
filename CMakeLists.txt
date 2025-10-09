@@ -36,6 +36,10 @@ add_executable(hostctl
     ${IMGUIFILEDIALOG_SRC}
 )
 
+if(WIN32)
+    set_target_properties(hostctl PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
+
 target_include_directories(hostctl PRIVATE
     ${IMGUI_DIR}
     ${IMGUI_DIR}/backends
