@@ -19,11 +19,12 @@ namespace fs = std::filesystem;
 #include "imgui_stdlib.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
-#include <sentinel/core/logger.h>
 #include "ImGuiFileDialog.h"
 
 #include "fonts/rubik.h"
 #include "ThemeManager/themes.h"
+
+#include <sentinel/common.h>
 
 #define XAMPP_ID 0
 #define WAMP_ID 1
@@ -326,7 +327,7 @@ int main() {
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
-        ImGui::SetNextWindowViewport(viewport->ID);
+        //ImGui::SetNextWindowViewport(viewport->ID);
 
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
             ImGuiWindowFlags_NoResize |
