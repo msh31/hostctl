@@ -66,6 +66,11 @@ WebServerInfo detectWebServers() {
     }
     
     fs::path wampApache = "C:/wamp64/bin/apache";
+
+    if (fs::exists("C:/wamp/bin/apache")) {
+        wampApache = "C:/wamp/bin/apache";
+    }
+
     if (fs::exists(wampApache)) {
         for (const auto& entry : fs::directory_iterator(wampApache)) {
             if (entry.is_directory()) {

@@ -37,14 +37,16 @@ add_executable(hostctl
 )
 
 if(WIN32)
-    set_target_properties(hostctl PROPERTIES WIN32_EXECUTABLE TRUE)
+    set_target_properties(hostctl PROPERTIES
+        WIN32_EXECUTABLE TRUE
+    )
 endif()
 
 target_include_directories(hostctl PRIVATE
     ${IMGUI_DIR}
     ${IMGUI_DIR}/backends
     ${IMGUI_DIR}/misc/cpp
-    
+
     ${CMAKE_SOURCE_DIR}/libs/ImGuiFileDialog
 )
 
@@ -52,15 +54,15 @@ find_package(OpenGL REQUIRED)
 
 if(WIN32)
     target_link_libraries(
-        hostctl 
-        glfw 
+        hostctl
+        glfw
         OpenGL::GL
         sentinel
     )
 else()
     target_link_libraries(
-        hostctl 
-        glfw 
+        hostctl
+        glfw
         OpenGL::GL
     )
 endif()
