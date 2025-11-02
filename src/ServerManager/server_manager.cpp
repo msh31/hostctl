@@ -58,7 +58,7 @@ WebServerInfo ServerManager::detectWebServers() {
     return info;
 }
 
-bool ServerManager::restartApache(const WebServerInfo& info, const std::string &placeHolderText) {
+bool ServerManager::restartApache(const WebServerInfo& info, std::string& placeholderText) {
     if(info.mampFound) {
         const char* stopScript = "/Applications/MAMP/bin/stopApache.sh";
         const char* startScript = "/Applications/MAMP/bin/startApache.sh";
@@ -67,8 +67,6 @@ bool ServerManager::restartApache(const WebServerInfo& info, const std::string &
         if (stopResult != 0) {
             _logger.error("Failed to stop Apache. Exit code: " + std::to_string(stopResult));
         }
-
-        // std::this_thread::sleep_for(std::chrono::seconds(1));
 
         int startResult = std::system(startScript);
         if (startResult != 0) {
@@ -81,7 +79,6 @@ bool ServerManager::restartApache(const WebServerInfo& info, const std::string &
     }
 
 #ifdef _WIN32
-
     service_helper serviceHelper;
     if (info.wampFound) {
         bool stopSuccess = serviceHelper.stopService(info.wampServiceName);
@@ -89,13 +86,13 @@ bool ServerManager::restartApache(const WebServerInfo& info, const std::string &
 
         if (!stopSuccess) {
             placeholderText += "Failed to stop Apache (Wamp)!\n";
-            logger.error("Failed to stop Apache (Wamp). Exit code: " + GetLastError());
+            _logger.error("Failed to stop Apache (Wamp). Exit code: " + std::to_string(GetLastError()));
             return false;
         }
 
         if (!startSuccess) {
             placeholderText += "Failed to start Apache (Wamp)!\n";
-            logger.error("Failed to stop Apache (Wamp). Exit code: " + GetLastError());
+            _logger.error("Failed to start Apache (Wamp). Exit code: " + std::to_string(GetLastError()));
             return false;
         }
 
@@ -108,13 +105,13 @@ bool ServerManager::restartApache(const WebServerInfo& info, const std::string &
 
         if (!stopSuccess) {
             placeholderText += "Failed to stop Apache (Xampp)!\n";
-            logger.error("Failed to stop Apache (Xampp). Exit code: " + GetLastError());
+            _logger.error("Failed to stop Apache (Xampp). Exit code: " + std::to_string(GetLastError()));
             return false;
         }
 
         if (!startSuccess) {
             placeholderText += "Failed to start Apache (Xampp)!\n";
-            logger.error("Failed to stop Apache (Xampp). Exit code: " + GetLastError());
+            _logger.error("Failed to start Apache (Xampp). Exit code: " + std::to_string(GetLastError()));
             return false;
         }
 
@@ -126,35 +123,44 @@ bool ServerManager::restartApache(const WebServerInfo& info, const std::string &
 
 std::string ServerManager::createHost(const WebServerInfo &info) {
     Config config;
+    std::string resultMessages;
+    bool anySuccess = false;
 
     if (info.xamppFound) {
         bool success = config.writeToConfig(XAMPP_ID, info, projectName, projectDirectory);
         if (success) {
-            return "Success: Custom vhost written to xampp config!\n";
+            resultMessages += "Success: Custom vhost written to XAMPP config!\n";
+            anySuccess = true;
         } else {
-            return "Failure: Writing to xampp config!\n";
+            resultMessages += "Failure: Writing to XAMPP config!\n";
         }
     }
     
     if (info.wampFound) {
         bool success = config.writeToConfig(WAMP_ID, info, projectName, projectDirectory);
         if (success) {
-            return "Success: Custom vhost written to wamp config!\n";
+            resultMessages += "Success: Custom vhost written to WAMP config!\n";
+            anySuccess = true;
         } else {
-            return "Failure: Writing to wamp config!\n";
+            resultMessages += "Failure: Writing to WAMP config!\n";
         }
     }
     
     if (info.mampFound) {
         bool success = config.writeToConfig(MAMP_ID, info, projectName, projectDirectory);
         if (success) {
-            return "Success: Custom vhost written to mamp (pro) config!\n";
+            resultMessages += "Success: Custom vhost written to MAMP config!\n";
+            anySuccess = true;
         } else {
-            return "Failure: Writing to mamp (pro) config!\n";
+            resultMessages += "Failure: Writing to MAMP config!\n";
         }
     }
     
-    return "No servers found or all failed!";
+    if (!anySuccess) {
+        return "No servers found or all failed!";
+    }
+    
+    return resultMessages;
 }
 
 bool Config::writeToConfig(int serverID, const WebServerInfo& info, const std::string & serverName, const std::string& documentRoot) {

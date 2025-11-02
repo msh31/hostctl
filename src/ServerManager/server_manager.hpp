@@ -31,7 +31,7 @@ class ServerManager {
         std::string projectName;
     
         WebServerInfo detectWebServers();
-        bool restartApache(const WebServerInfo &info, const std::string &placeHolderText);
+        bool restartApache(const WebServerInfo &info, std::string& placeholderText);
         std::string createHost(const WebServerInfo &info);
 };
 
