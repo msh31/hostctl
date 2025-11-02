@@ -1,4 +1,7 @@
 #include "server_manager.hpp"
+#ifdef _WIN32
+    #include <sentinel/core/utils/service_helper.h>
+#endif
 
 namespace fs = std::filesystem;
 logger _logger;
@@ -55,7 +58,7 @@ WebServerInfo ServerManager::detectWebServers() {
     return info;
 }
 
-bool ServerManager::restartApache(const WebServerInfo& info) {
+bool ServerManager::restartApache(const WebServerInfo& info, const std::string &placeHolderText) {
     if(info.mampFound) {
         const char* stopScript = "/Applications/MAMP/bin/stopApache.sh";
         const char* startScript = "/Applications/MAMP/bin/startApache.sh";
@@ -118,7 +121,6 @@ bool ServerManager::restartApache(const WebServerInfo& info) {
         return true;
     }
 #endif
-
     return false;
 }
 
