@@ -2,10 +2,6 @@
     #define GL_SILENCE_DEPRECATION
 #endif	
 
-#ifdef _WIN32
-    #include <sentinel/core/utils/service_helper.h>
-#endif
-
 #include <cstdlib> 
 #include <string>
 #include <filesystem>
@@ -157,11 +153,7 @@ int main() {
         }
         ImGui::SameLine();
         if (ImGui::Button("Restart Web Server", ImVec2(150, 0))) {
-            if(serverManager.restartApache(serverInfo)) {
-                placeholderText += "apache failed to restart!";
-            }
-
-            placeholderText += "apache restarted!";
+            serverManager.restartApache(serverInfo, placeholderText);
         }
 
         ImGui::Dummy(ImVec2(0, 10));
