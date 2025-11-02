@@ -1,8 +1,8 @@
 #ifdef __APPLE__
     #define GL_SILENCE_DEPRECATION
-#endif	
+#endif
 
-#include <cstdlib> 
+#include <cstdlib>
 #include <string>
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -39,32 +39,32 @@ int main() {
     logger.consoleLoggingEnabled = false;
     logger.fileLoggingEnabled = true;
 
-// window properties 
+// window properties
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // no old OpenGL
-    
-// window creation    
+
+// window creation
     GLFWwindow* window;
     window = glfwCreateWindow(750, 550, "HostCTL - A simple local network manager for XAMPP, WAMP & MAMP (Pro)", NULL, NULL);
-    
+
     if(window == NULL) {
         logger.error("Failed to create GLFW window. OpenGL 3.3 support is required!");
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
-    
+
 //imgui context creation, theme/window style, flags & setting platform/render backends
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ThemeManager::ApplyTheme(ThemeType::Dark);
-    
+
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;     
-    
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
     ImFontConfig cfg16;
     cfg16.FontDataOwnedByAtlas = false;
     ImFont* font16 = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 16.0f, &cfg16);
@@ -72,7 +72,7 @@ int main() {
     #ifdef __WIN32__
         ImFontConfig cfg18;
         cfg18.FontDataOwnedByAtlas = false;
-        ImFont* subTitleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 18.0f, &cfg18);        
+        ImFont* subTitleFont = io.Fonts->AddFontFromMemoryTTF((void*)Rubik, Rubik_len, 18.0f, &cfg18);
     #endif
 
     ImFontConfig cfg24;
@@ -91,7 +91,7 @@ int main() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-		
+
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
@@ -118,7 +118,7 @@ int main() {
         ImGui::PushFont(titleFont);
         ImGui::Text("HostCTL");
         ImGui::PopFont();
-        #ifdef __WIN32__ 
+        #ifdef __WIN32__
         ImGui::PushFont(subTitleFont);
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255,255,255,130));
         ImGui::Text("Note: If you have xampp AND wamp, the host will be written to both because I am lazy..");
@@ -149,6 +149,8 @@ int main() {
         ImGui::Dummy(ImVec2(0, 20));
 
         if (ImGui::Button("Create Host", ImVec2(120, 0))) {
+            serverManager.projectName = projectName;
+            serverManager.projectDirectory = projectDirectory;
             placeholderText += serverManager.createHost(serverInfo);
         }
         ImGui::SameLine();
@@ -157,7 +159,7 @@ int main() {
         }
 
         ImGui::Dummy(ImVec2(0, 10));
-        
+
         bool anyServerFound = serverInfo.xamppFound || serverInfo.wampFound || serverInfo.mampFound;
         std::string statusText = "Web Server Status: ";
 
@@ -172,11 +174,11 @@ int main() {
         } else {
             statusText += "Not Found";
         }
-        ImGui::TextColored(anyServerFound ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 
+        ImGui::TextColored(anyServerFound ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
         "%s", statusText.c_str());
-        
+
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.7f), "%s", placeholderText.c_str());
-        
+
         ImGui::EndChild();
 
         //file dialog destreuction
@@ -196,7 +198,7 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    while( 
+    while(
         glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
         glfwWindowShouldClose(window) == 0
     );
@@ -204,7 +206,7 @@ int main() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-    glfwDestroyWindow(window);    
+    glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
 }

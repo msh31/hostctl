@@ -1,4 +1,5 @@
 #include "server_manager.hpp"
+
 #ifdef _WIN32
     #include <sentinel/core/utils/service_helper.h>
 #endif
@@ -22,7 +23,7 @@ WebServerInfo ServerManager::detectWebServers() {
     #else
         xamppConfig = ""; //TODO
     #endif
-    
+
     if (fs::exists(xamppConfig)) {
         info.xamppFound = true;
         info.xamppPath = xamppPath;
@@ -124,42 +125,34 @@ bool ServerManager::restartApache(const WebServerInfo& info, std::string& placeh
 std::string ServerManager::createHost(const WebServerInfo &info) {
     Config config;
     std::string resultMessages;
-    bool anySuccess = false;
 
     if (info.xamppFound) {
         bool success = config.writeToConfig(XAMPP_ID, info, projectName, projectDirectory);
         if (success) {
             resultMessages += "Success: Custom vhost written to XAMPP config!\n";
-            anySuccess = true;
         } else {
             resultMessages += "Failure: Writing to XAMPP config!\n";
         }
     }
-    
+
     if (info.wampFound) {
         bool success = config.writeToConfig(WAMP_ID, info, projectName, projectDirectory);
         if (success) {
             resultMessages += "Success: Custom vhost written to WAMP config!\n";
-            anySuccess = true;
         } else {
             resultMessages += "Failure: Writing to WAMP config!\n";
         }
     }
-    
+
     if (info.mampFound) {
         bool success = config.writeToConfig(MAMP_ID, info, projectName, projectDirectory);
         if (success) {
             resultMessages += "Success: Custom vhost written to MAMP config!\n";
-            anySuccess = true;
         } else {
             resultMessages += "Failure: Writing to MAMP config!\n";
         }
     }
-    
-    if (!anySuccess) {
-        return "No servers found or all failed!";
-    }
-    
+
     return resultMessages;
 }
 
@@ -168,6 +161,7 @@ bool Config::writeToConfig(int serverID, const WebServerInfo& info, const std::s
     std::string normalizedDirPath = documentRoot;
 
    if (serverID == XAMPP_ID) {
+       _logger.success("we f ound em");
         if (!info.xamppFound) return false;
         stackConfigPath = info.xamppConfigPath;
         vHostPort = "80";
@@ -206,9 +200,10 @@ bool Config::writeToConfig(int serverID, const WebServerInfo& info, const std::s
     configIn.close();
 
     if (vhostExists) {
+        _logger.error("vhost already exists");
         return false;
     }
-    
+
     std::string vhostConfig = R"(
 <VirtualHost *:)" + vHostPort + R"(>
     ServerName )" + serverName + R"(
@@ -242,6 +237,7 @@ bool Config::writeToConfig(int serverID, const WebServerInfo& info, const std::s
         std::ofstream hostsFile(hostPath, std::ios::app);
 
         if (!hostsFile.is_open()) {
+            _logger.error("config writer: couldnt open log file");
             return false;
         }
 
@@ -251,6 +247,7 @@ bool Config::writeToConfig(int serverID, const WebServerInfo& info, const std::s
 
     std::ofstream configFile(stackConfigPath, std::ios::app);
     if (!configFile.is_open()) {
+        _logger.error("config writer: couldnt open log file");
         return false;
     }
 
