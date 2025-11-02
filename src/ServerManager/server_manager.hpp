@@ -32,7 +32,7 @@ class ServerManager {
     
         WebServerInfo detectWebServers();
         bool restartApache(const WebServerInfo &info);
-        std::string createHost(const WebServerInfo &info); //because we just return the placeholder text to display to the user
+        std::string createHost(const WebServerInfo &info);
 };
 
 // dont like this but i need to access this var right here v

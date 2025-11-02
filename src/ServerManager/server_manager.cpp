@@ -124,13 +124,11 @@ bool ServerManager::restartApache(const WebServerInfo& info) {
 
 std::string ServerManager::createHost(const WebServerInfo &info) {
     Config config;
-    bool anySuccess = false;
 
     if (info.xamppFound) {
         bool success = config.writeToConfig(XAMPP_ID, info, projectName, projectDirectory);
         if (success) {
             return "Success: Custom vhost written to xampp config!\n";
-            anySuccess = true;
         } else {
             return "Failure: Writing to xampp config!\n";
         }
@@ -140,7 +138,6 @@ std::string ServerManager::createHost(const WebServerInfo &info) {
         bool success = config.writeToConfig(WAMP_ID, info, projectName, projectDirectory);
         if (success) {
             return "Success: Custom vhost written to wamp config!\n";
-            anySuccess = true;
         } else {
             return "Failure: Writing to wamp config!\n";
         }
@@ -150,17 +147,12 @@ std::string ServerManager::createHost(const WebServerInfo &info) {
         bool success = config.writeToConfig(MAMP_ID, info, projectName, projectDirectory);
         if (success) {
             return "Success: Custom vhost written to mamp (pro) config!\n";
-            anySuccess = true;
         } else {
             return "Failure: Writing to mamp (pro) config!\n";
         }
     }
     
-    if (!anySuccess) {
-        return "No servers found or all failed!";
-    }
-
-    return "";
+    return "No servers found or all failed!";
 }
 
 bool Config::writeToConfig(int serverID, const WebServerInfo& info, const std::string & serverName, const std::string& documentRoot) {
