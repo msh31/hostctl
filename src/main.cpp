@@ -6,11 +6,9 @@
     #include <sentinel/core/utils/service_helper.h>
 #endif
 
-#include <iostream>
 #include <cstdlib> 
 #include <string>
 #include <filesystem>
-#include <fstream>
 namespace fs = std::filesystem;
 
 #include <GLFW/glfw3.h>
@@ -23,242 +21,16 @@ namespace fs = std::filesystem;
 
 #include "fonts/rubik.h"
 #include "ThemeManager/themes.h"
-
-#include <sentinel/core/logger.h>
-
-#define XAMPP_ID 0
-#define WAMP_ID 1
-#define MAMP_ID 2
+#include "ServerManager/server_manager.hpp"
 
 logger logger;
+ServerManager serverManager;
 
 std::string projectDirectory, projectName;
 std::string placeholderText;
 
-struct WebServerInfo {
-    bool xamppFound = false;
-    bool wampFound = false;
-	bool mampFound = false;	
-
-    std::string xamppPath;
-    std::string wampPath;
-	std::string mampPath;
-
-    std::string xamppConfigPath;
-    std::string wampConfigPath;
-	std::string mampConfigPath;
-
-    std::string xamppServiceName = "Apache2.4";
-    std::string wampServiceName = "wampapache64";
-};
-
 std::string extractProjectName(const std::string& path) {
     return fs::path(path).filename().string();
-}
-
-WebServerInfo detectWebServers() {
-    WebServerInfo info;
-
-    fs::path xamppConfig = "C:/xampp/apache/conf/extra/httpd-vhosts.conf";
-    if (fs::exists(xamppConfig)) {
-        info.xamppFound = true;
-        info.xamppPath = "C:/xampp";
-        info.xamppConfigPath = xamppConfig.string();
-    }
-    
-    fs::path wampApache = "C:/wamp64/bin/apache";
-
-    if (fs::exists("C:/wamp/bin/apache")) {
-        wampApache = "C:/wamp/bin/apache";
-    }
-
-    if (fs::exists(wampApache)) {
-        for (const auto& entry : fs::directory_iterator(wampApache)) {
-            if (entry.is_directory()) {
-                fs::path vhostPath = entry.path() / "conf" / "extra" / "httpd-vhosts.conf";
-                if (fs::exists(vhostPath)) {
-                    info.wampFound = true;
-                    info.wampPath = "C:/wamp64";
-                    info.wampConfigPath = vhostPath.string();
-                    break;
-                }
-            }
-        }
-    }
-
-    fs::path mampConfig = "/Applications/MAMP/conf/apache/extra/httpd-vhosts.conf";
-    if (fs::exists(mampConfig)) {
-        info.mampFound = true;
-        info.mampPath = "/Applications/MAMP/";
-        info.mampConfigPath = mampConfig.string();
-    }
-
-    return info;
-}
-
-bool writeToConfig(int serverID, const WebServerInfo& info, const std::string& serverName, const std::string& documentRoot) {
-    std::string configPath, vhostPort;
-    
-    if (serverID == XAMPP_ID) {
-        if (!info.xamppFound) return false;
-        configPath = info.xamppConfigPath;
-        vhostPort = "80";
-    } else if (serverID == WAMP_ID) {
-        if (!info.wampFound) return false;
-        configPath = info.wampConfigPath;
-        vhostPort = "80";
-    } else if (serverID == MAMP_ID) {
-        if (!info.mampFound) return false;
-        configPath = info.mampConfigPath;
-        vhostPort = "8888";
-    } else {
-        return false;
-    }
-
-    std::string normalizedDocRoot = documentRoot;
-    std::string normalizedDirPath = documentRoot;
-
-#ifdef _WIN32
-    std::replace(normalizedDocRoot.begin(), normalizedDocRoot.end(), '\\', '/');
-    std::replace(normalizedDirPath.begin(), normalizedDirPath.end(), '\\', '/');
-#endif
-
-    if (!normalizedDirPath.empty() && normalizedDirPath.back() != '/') {
-        normalizedDirPath += '/';
-    }
-
-    // duplicate check
-    std::ifstream configIn(configPath);
-    std::string configLine;
-    bool vhostExists = false;
-
-    while (std::getline(configIn, configLine)) {
-        if (configLine.find("ServerName " + serverName) != std::string::npos) {
-            vhostExists = true;
-            break;
-        }
-    }
-    configIn.close();
-
-    if (vhostExists) {
-        return false;
-    }
-    
-    std::string vhostConfig = R"(
-<VirtualHost *:)" + vhostPort + R"(>
-    ServerName )" + serverName + R"(
-    DocumentRoot ")" + normalizedDocRoot + R"("
-    <Directory ")" + normalizedDirPath + R"(">
-        AllowOverride All
-        Require all granted
-    </Directory>
-</VirtualHost>
-)";
-
-#ifdef _WIN32
-    std::string hostPath = R"(C:\Windows\System32\drivers\etc\hosts)";
-#elif defined(__APPLE__) || defined(__linux__)
-    std::string hostPath = R"(/etc/hosts)";
-#endif
-
-    // dupe check
-    std::ifstream hostsIn(hostPath);
-    std::string hostLine;
-    bool hostExists = false;
-    while (std::getline(hostsIn, hostLine)) {
-        if (hostLine.find("127.0.0.1 " + serverName) != std::string::npos) {
-            hostExists = true;
-            break;
-        }
-    }
-    hostsIn.close();
-
-    if (!hostExists) {
-        std::ofstream hostsFile(hostPath, std::ios::app);
-
-        if (!hostsFile.is_open()) {
-            return false;
-        }
-
-        hostsFile << "127.0.0.1 " << serverName << "\n";
-        hostsFile.close();
-    }
-
-    std::ofstream configFile(configPath, std::ios::app);
-    if (!configFile.is_open()) {
-        return false;
-    }
-
-    configFile << vhostConfig << "\n";
-    configFile.close();
-    return true;
-}
-
-bool restartApache(const WebServerInfo& info) {
-    if(info.mampFound) {
-        const char* stopScript = "/Applications/MAMP/bin/stopApache.sh";
-        const char* startScript = "/Applications/MAMP/bin/startApache.sh";
-
-        int stopResult = std::system(stopScript);
-        if (stopResult != 0) {
-            logger.error("Failed to stop Apache. Exit code: " + stopResult);
-        }
-
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-
-        int startResult = std::system(startScript);
-        if (startResult != 0) {
-            logger.error("Failed to start Apache. Exit code: " + startResult);
-            return false;
-        }
-
-        logger.success("Apache successfully restarted via MAMP.");
-        return true;
-    }
-
-#ifdef _WIN32
-
-    service_helper serviceHelper;
-    if (info.wampFound) {
-        bool stopSuccess = serviceHelper.stopService(info.wampServiceName);
-        bool startSuccess = serviceHelper.startService(info.wampServiceName);
-
-        if (!stopSuccess) {
-            placeholderText += "Failed to stop Apache (Wamp)!\n";
-            logger.error("Failed to stop Apache (Wamp). Exit code: " + GetLastError());
-            return false;
-        }
-
-        if (!startSuccess) {
-            placeholderText += "Failed to start Apache (Wamp)!\n";
-            logger.error("Failed to stop Apache (Wamp). Exit code: " + GetLastError());
-            return false;
-        }
-
-        return true;
-    }
-
-    if (info.xamppFound) {
-        bool stopSuccess = serviceHelper.stopService(info.xamppServiceName);
-        bool startSuccess = serviceHelper.startService(info.xamppServiceName);
-
-        if (!stopSuccess) {
-            placeholderText += "Failed to stop Apache (Xampp)!\n";
-            logger.error("Failed to stop Apache (Xampp). Exit code: " + GetLastError());
-            return false;
-        }
-
-        if (!startSuccess) {
-            placeholderText += "Failed to start Apache (Xampp)!\n";
-            logger.error("Failed to stop Apache (Xampp). Exit code: " + GetLastError());
-            return false;
-        }
-
-        return true;
-    }
-#endif
-
-    return false;
 }
 
 int main() {
@@ -267,7 +39,7 @@ int main() {
         return -1;
     }
 
-    WebServerInfo serverInfo = detectWebServers();
+    WebServerInfo serverInfo = serverManager.detectWebServers();
     logger.consoleLoggingEnabled = false;
     logger.fileLoggingEnabled = true;
 
@@ -381,46 +153,15 @@ int main() {
         ImGui::Dummy(ImVec2(0, 20));
 
         if (ImGui::Button("Create Host", ImVec2(120, 0))) {
-            bool anySuccess = false;
-            placeholderText = "";
-            
-            if (serverInfo.xamppFound) {
-                bool success = writeToConfig(XAMPP_ID, serverInfo, projectName, projectDirectory);
-                if (success) {
-                    placeholderText += "Success: Custom vhost written to xampp config!\n";
-                    anySuccess = true;
-                } else {
-                    placeholderText += "Failure: Writing to xampp config!\n";
-                }
-            }
-            
-            if (serverInfo.wampFound) {
-                bool success = writeToConfig(WAMP_ID, serverInfo, projectName, projectDirectory);
-                if (success) {
-                    placeholderText += "Success: Custom vhost written to wamp config!\n";
-                    anySuccess = true;
-                } else {
-                    placeholderText += "Failure: Writing to wamp config!\n";
-                }
-            }
-            
-            if (serverInfo.mampFound) {
-                bool success = writeToConfig(MAMP_ID, serverInfo, projectName, projectDirectory);
-                if (success) {
-                    placeholderText += "Success: Custom vhost written to mamp (pro) config!\n";
-                    anySuccess = true;
-                } else {
-                    placeholderText += "Failure: Writing to mamp (pro) config!\n";
-                }
-            }
-            
-            if (!anySuccess) {
-                placeholderText = "No servers found or all failed!";
-            }
+            placeholderText += serverManager.createHost(serverInfo);
         }
         ImGui::SameLine();
         if (ImGui::Button("Restart Web Server", ImVec2(150, 0))) {
-            restartApache(serverInfo);
+            if(serverManager.restartApache(serverInfo)) {
+                placeholderText += "apache failed to restart!";
+            }
+
+            placeholderText += "apache restarted!";
         }
 
         ImGui::Dummy(ImVec2(0, 10));

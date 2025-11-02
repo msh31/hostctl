@@ -30,6 +30,7 @@ set(IMGUIFILEDIALOG_SRC
 add_executable(hostctl
     src/main.cpp
     src/ThemeManager/themes.cpp
+    src/ServerManager/server_manager.cpp
     ${IMGUI_SRC}
     ${IMGUIFILEDIALOG_SRC}
 )
