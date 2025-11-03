@@ -27,13 +27,23 @@ set(IMGUIFILEDIALOG_SRC
     ${CMAKE_SOURCE_DIR}/libs/ImGuiFileDialog/ImGuiFileDialog.cpp
 )
 
-add_executable(hostctl WIN32
+set(HOSTCTL_SRC
     src/main.cpp
     src/ThemeManager/themes.cpp
     src/ServerManager/server_manager.cpp
     ${IMGUI_SRC}
     ${IMGUIFILEDIALOG_SRC}
 )
+
+if(APPLE)
+    add_executable(hostctl MACOSX_BUNDLE ${HOSTCTL_SRC})
+    set_target_properties(hostctl PROPERTIES
+        MACOSX_BUNDLE_BUNDLE_NAME "hostctl"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.msh31.hostctl"
+    )
+else()
+    add_executable(hostctl WIN32 ${HOSTCTL_SRC})
+endif()
 
 target_include_directories(hostctl PRIVATE
     ${IMGUI_DIR}
