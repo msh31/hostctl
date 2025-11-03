@@ -1,9 +1,5 @@
 #include "server_manager.hpp"
 
-#ifdef _WIN32
-    #include <sentinel/core/utils/service_helper.h>
-#endif
-
 namespace fs = std::filesystem;
 logger _logger;
 
@@ -60,6 +56,7 @@ WebServerInfo ServerManager::detectWebServers() {
 }
 
 bool ServerManager::restartApache(const WebServerInfo& info, std::string& placeholderText) {
+    //TODO: fix linux ver of mamp, hardcoded to macOS rn.
     if(info.mampFound) {
         const char* stopScript = "/Applications/MAMP/bin/stopApache.sh";
         const char* startScript = "/Applications/MAMP/bin/startApache.sh";
@@ -79,9 +76,55 @@ bool ServerManager::restartApache(const WebServerInfo& info, std::string& placeh
         return true;
     }
 
+    if (info.xamppFound) {
+        #ifdef _WIN32
+            service_helper serviceHelper;
+
+            bool stopSuccess = serviceHelper.stopService(info.xamppServiceName);
+            bool startSuccess = serviceHelper.startService(info.xamppServiceName);
+
+            if (!stopSuccess) {
+                placeholderText += "Failed to stop Apache (Xampp)!\n";
+                _logger.error("Failed to stop Apache (Xampp). Exit code: " + std::to_string(GetLastError()));
+                return false;
+            }
+
+            if (!startSuccess) {
+                placeholderText += "Failed to start Apache (Xampp)!\n";
+                _logger.error("Failed to start Apache (Xampp). Exit code: " + std::to_string(GetLastError()));
+                return false;
+            }
+
+            return true;
+        #endif
+
+        #ifdef __APPLE__
+            const char* stopScript = "/Applications/XAMPP/bin/stopApache.sh";
+            const char* startScript = "/Applications/XAMPP/bin/startApache.sh";
+
+            int stopCode = std::system(stopScript);
+            int startCode = std::system(startScript);
+
+            if (stopCode != 0) {
+                _logger.error("Failed to stop Apache (XAMPP)!");
+                return false;
+            }
+
+            if (startCode != 0) {
+                _logger.error("Failed to start Apache (XAMPP)!");
+                return false;
+            }
+
+            return true;
+        #endif
+
+        return false;
+    }
+
 #ifdef _WIN32
-    service_helper serviceHelper;
     if (info.wampFound) {
+        service_helper serviceHelper;
+
         bool stopSuccess = serviceHelper.stopService(info.wampServiceName);
         bool startSuccess = serviceHelper.startService(info.wampServiceName);
 
@@ -94,25 +137,6 @@ bool ServerManager::restartApache(const WebServerInfo& info, std::string& placeh
         if (!startSuccess) {
             placeholderText += "Failed to start Apache (Wamp)!\n";
             _logger.error("Failed to start Apache (Wamp). Exit code: " + std::to_string(GetLastError()));
-            return false;
-        }
-
-        return true;
-    }
-
-    if (info.xamppFound) {
-        bool stopSuccess = serviceHelper.stopService(info.xamppServiceName);
-        bool startSuccess = serviceHelper.startService(info.xamppServiceName);
-
-        if (!stopSuccess) {
-            placeholderText += "Failed to stop Apache (Xampp)!\n";
-            _logger.error("Failed to stop Apache (Xampp). Exit code: " + std::to_string(GetLastError()));
-            return false;
-        }
-
-        if (!startSuccess) {
-            placeholderText += "Failed to start Apache (Xampp)!\n";
-            _logger.error("Failed to start Apache (Xampp). Exit code: " + std::to_string(GetLastError()));
             return false;
         }
 

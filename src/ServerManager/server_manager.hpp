@@ -2,7 +2,7 @@
 #include <iostream>
 #include <filesystem>
 
-#include <sentinel/core/logger.h>
+#include <sentinel/core/sentinel.h>
 
 #define XAMPP_ID 0
 #define WAMP_ID 1
@@ -11,7 +11,7 @@
 struct WebServerInfo {
     bool xamppFound = false;
     bool wampFound = false;
-	bool mampFound = false;	
+	bool mampFound = false;
 
     std::string xamppPath;
     std::string wampPath;
@@ -29,7 +29,7 @@ class ServerManager {
     public:
         std::string projectDirectory;
         std::string projectName;
-    
+
         WebServerInfo detectWebServers();
         bool restartApache(const WebServerInfo &info, std::string& placeholderText);
         std::string createHost(const WebServerInfo &info);

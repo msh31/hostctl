@@ -161,19 +161,20 @@ int main() {
         ImGui::Dummy(ImVec2(0, 10));
 
         bool anyServerFound = serverInfo.xamppFound || serverInfo.wampFound || serverInfo.mampFound;
-        std::string statusText = "Web Server Status: ";
+        std::string statusText = "Web Server Status: \n\n";
 
-        if (serverInfo.xamppFound && serverInfo.wampFound) {
-            statusText += "XAMPP & WAMP Found";
-        } else if (serverInfo.xamppFound) {
-            statusText += "XAMPP Found";
-        } else if (serverInfo.wampFound) {
-            statusText += "WAMP Found";
-        } else if (serverInfo.mampFound) {
-            statusText += "MAMP (Pro) found";
-        } else {
-            statusText += "Not Found";
+        if (serverInfo.xamppFound) {
+            statusText += "XAMPP Found\n";
         }
+
+        if (serverInfo.wampFound) {
+            statusText += "WAMP Found\n";
+        }
+
+        if (serverInfo.mampFound) {
+            statusText += "MAMP (Pro) found\n";
+        }
+
         ImGui::TextColored(anyServerFound ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
         "%s", statusText.c_str());
 
