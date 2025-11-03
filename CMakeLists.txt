@@ -27,7 +27,7 @@ set(IMGUIFILEDIALOG_SRC
     ${CMAKE_SOURCE_DIR}/libs/ImGuiFileDialog/ImGuiFileDialog.cpp
 )
 
-add_executable(hostctl
+add_executable(hostctl WIN32
     src/main.cpp
     src/ThemeManager/themes.cpp
     src/ServerManager/server_manager.cpp
