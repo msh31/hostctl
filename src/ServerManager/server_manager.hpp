@@ -2,8 +2,6 @@
 #include <iostream>
 #include <filesystem>
 
-#include <sentinel/core/sentinel.h>
-
 #define XAMPP_ID 0
 #define WAMP_ID 1
 #define MAMP_ID 2

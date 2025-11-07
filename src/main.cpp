@@ -1,3 +1,5 @@
+#include "sentinel/core/logger.h"
+
 #ifdef __APPLE__
     #define GL_SILENCE_DEPRECATION
 #endif
@@ -179,7 +181,6 @@ int main() {
         "%s", statusText.c_str());
 
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.7f), "%s", placeholderText.c_str());
-
         ImGui::EndChild();
 
         //file dialog destreuction

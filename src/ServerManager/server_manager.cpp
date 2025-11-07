@@ -1,5 +1,7 @@
 #include "server_manager.hpp"
 
+#include <sentinel/core/sentinel.h>
+
 namespace fs = std::filesystem;
 logger _logger;
 
