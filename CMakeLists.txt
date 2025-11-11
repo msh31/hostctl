@@ -36,13 +36,19 @@ set(HOSTCTL_SRC
 )
 
 if(APPLE)
-    add_executable(hostctl MACOSX_BUNDLE ${HOSTCTL_SRC})
-    set_target_properties(hostctl PROPERTIES
-        MACOSX_BUNDLE_BUNDLE_NAME "hostctl"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.msh31.hostctl"
-    )
-else()
+    if(CMAKE_BUILD_TYPE STREQUAL "Release") 
+        add_executable(hostctl MACOSX_BUNDLE ${HOSTCTL_SRC})
+        set_target_properties(hostctl PROPERTIES
+            MACOSX_BUNDLE_BUNDLE_NAME "hostctl"
+            MACOSX_BUNDLE_GUI_IDENTIFIER "com.msh31.hostctl"
+        )
+    else()
+        add_executable(hostctl ${HOSTCTL_SRC}) 
+    endif() 
+elseif(WIN32)
     add_executable(hostctl WIN32 ${HOSTCTL_SRC})
+else()
+    add_executable(hostctl ${HOSTCTL_SRC})
 endif()
 
 target_include_directories(hostctl PRIVATE
