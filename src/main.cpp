@@ -31,10 +31,25 @@ std::string extractProjectName(const std::string& path) {
     return fs::path(path).filename().string();
 }
 
+#if defined(__APPLE__) || defined(__linux__)
+#include <unistd.h>
+    bool isRunningAsRoot() {
+        return geteuid() == 0;
+    }
+#else
+    bool isRunningAsRoot() {
+        return false;
+    }
+#endif
+
 int main() {
     if(!glfwInit()) {
         logger.error("Failed to initialize GLFW.");
         return -1;
+    }
+
+    if(!isRunningAsRoot()) {
+        logger.warning("You are not running HostCTL as administrator / root. This is required for restarting the apache services.");
     }
 
     WebServerInfo serverInfo = serverManager.detectWebServers();
